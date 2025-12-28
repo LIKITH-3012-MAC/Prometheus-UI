@@ -99,3 +99,87 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .voice-bar { animation: none; }
 }
+
+/* Code Block Styling */
+.code-block {
+  background: #0b0b0b;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  padding: 8px 12px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+.copy-btn {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  font-size: 10px;
+  transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+  background: var(--primary);
+  color: #000;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #111;
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  animation: slideUp 0.3s ease forwards;
+}
+
+/* Reading Mode */
+.reading-mode {
+  --ai-font-size: 1.05rem;
+  --ai-line-height: 1.9;
+}
+
+.normal-mode {
+  --ai-font-size: 0.95rem;
+  --ai-line-height: 1.6;
+}
+
+/* Assistant Message Typography */
+.ai-message {
+  font-size: var(--ai-font-size);
+  line-height: var(--ai-line-height);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Font Control Buttons */
+.font-btn {
+  padding: 4px 8px;
+  font-size: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  color: #9ca3af;
+  transition: all 0.2s ease;
+}
+
+.font-btn:hover {
+  background: var(--primary);
+  color: #000;
+}
