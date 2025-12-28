@@ -3,46 +3,52 @@
 @tailwind utilities;
 
 :root {
-  --obsidian: #030303;
-  --neon-cyan: #00f2ff;
-  --glass: rgba(255, 255, 255, 0.03);
-  --border: rgba(255, 255, 255, 0.08);
+  --obsidian-dark: #020203;
+  --cyan-glow: #00f2ff;
+  --glass-white: rgba(255, 255, 255, 0.05);
 }
 
 body {
-  background: var(--obsidian);
-  color: #94a3b8;
-  overflow: hidden;
+  background: var(--obsidian-dark);
+  color: #ccd6f6;
   font-family: 'Inter', sans-serif;
+  overflow: hidden;
 }
 
-/* Neural Background Pulse */
-.neural-overlay {
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.02) 0%, transparent 80%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Glass Panel Architecture */
+/* World Class Glass Panel */
 .glass-panel {
-  background: var(--glass);
-  backdrop-filter: blur(40px) saturate(150%);
-  border: 1px solid var(--border);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  background: rgba(10, 10, 12, 0.8);
+  backdrop-filter: blur(25px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 50px rgba(0,0,0,0.8);
 }
 
-/* Custom Scrollbar for Terminal feel */
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.1); border-radius: 10px; }
-
-/* Code Block Stylings */
-pre {
-  background: rgba(0, 0, 0, 0.5) !important;
-  border-radius: 12px;
-  padding: 1.5rem !important;
-  border: 1px solid rgba(0, 242, 255, 0.1) !important;
-  font-family: 'JetBrains Mono', monospace !important;
+/* Search Bar Text Visibility FIX */
+.search-input {
+  background: rgba(255, 255, 255, 0.05);
+  color: white !important; /* Pure white text for search */
+  border: 1px solid rgba(0, 242, 255, 0.3);
+  caret-color: var(--cyan-glow);
 }
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Neural Chat Bubbles */
+.chat-bubble-ai {
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 3px solid var(--cyan-glow);
+  padding: 1.5rem;
+  border-radius: 0 20px 20px 20px;
+}
+
+.chat-bubble-user {
+  background: rgba(0, 242, 255, 0.08);
+  border-right: 3px solid var(--cyan-glow);
+  padding: 1.5rem;
+  border-radius: 20px 0 20px 20px;
+}
+
+/* Scrollbar hidden for software feel */
+::-webkit-scrollbar { width: 0; }
