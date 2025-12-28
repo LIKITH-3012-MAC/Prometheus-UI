@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",
+    "ai": "^6.0.3",
     "framer-motion": "^12.23.26",
     "groq-sdk": "^0.37.0",
     "lucide-react": "^0.562.0",
