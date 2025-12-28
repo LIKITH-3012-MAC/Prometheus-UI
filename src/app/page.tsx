@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function PrometheusAtoZ() {
+export default function PrometheusNeuralOS() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,56 +33,83 @@ export default function PrometheusAtoZ() {
   };
 
   return (
-    <main className="min-h-screen bg-[#05050a] text-white flex flex-col items-center p-4 md:p-8 relative">
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+    <main className="h-screen w-screen flex flex-col relative overflow-hidden bg-black">
+      <div className="star-bg"></div>
       
-      <div className="w-full max-w-7xl z-10 flex flex-col h-[92vh]">
-        <header className="text-center py-6">
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#00f3ff] via-[#bc13fe] to-[#ff00ff] animate-pulse">
-            PROMETHEUS
-          </h1>
-          <p className="text-[#00f3ff] text-[10px] tracking-[1.2em] font-bold mt-2 opacity-70">ARCHITECT: LIKITH NAIDU</p>
-        </header>
+      {/* HUD Elements */}
+      <div className="hud-corner top-left animate-pulse"></div>
+      <div className="hud-corner bottom-right animate-pulse"></div>
 
-        <div className="flex-1 glass-card border border-white/10 rounded-[40px] flex flex-col overflow-hidden shadow-[0_0_100px_rgba(0,0,0,1)] bg-black/40 backdrop-blur-3xl">
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 md:p-12 space-y-8 scrollbar-hide">
-            {messages.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center opacity-40">
-                <div className="relative w-24 h-24 mb-6">
-                  <div className="absolute inset-0 border-2 border-cyan-500 rounded-full animate-ping opacity-20"></div>
-                  <div className="absolute inset-2 border-2 border-purple-500 rounded-full animate-pulse opacity-40"></div>
-                  <div className="absolute inset-4 border-2 border-pink-500 rounded-full"></div>
-                </div>
-                <p className="text-xs font-black tracking-widest uppercase">Identity Verified: Likith Naidu</p>
-              </div>
-            )}
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in duration-500`}>
-                <div className={`p-6 rounded-[30px] max-w-[85%] border shadow-2xl ${
-                  m.role === 'user' 
-                  ? 'bg-gradient-to-br from-[#bc13fe]/40 to-indigo-600/40 border-[#bc13fe]/30 text-white' 
-                  : 'bg-white/5 border-white/10 text-cyan-50 font-light'
-                }`}>
-                  <p className="leading-relaxed text-sm md:text-lg">{m.content}</p>
-                </div>
-              </div>
-            ))}
-            {loading && <div className="text-[#ff00ff] animate-bounce text-[10px] font-black uppercase">Syncing Neural Data...</div>}
+      {/* Top Navigation / Status */}
+      <nav className="w-full p-6 flex justify-between items-center border-b border-white/5 backdrop-blur-md">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 border-2 border-cyan-500 rounded-full flex items-center justify-center animate-spin-slow">
+            <div className="w-6 h-6 bg-cyan-500 rounded-full blur-sm"></div>
           </div>
+          <div>
+            <h1 className="glitch text-xl font-black tracking-[0.3em] text-white">PROMETHEUS <span className="text-cyan-400">OS</span></h1>
+            <p className="text-[8px] text-cyan-500/60 font-bold uppercase tracking-widest">Architect: Likith Naidu</p>
+          </div>
+        </div>
+        <div className="hidden md:flex gap-8 text-[9px] font-bold tracking-[0.2em] text-white/40 uppercase">
+          <div className="flex flex-col items-end">
+            <span>Uptime</span>
+            <span className="text-white">99.98%</span>
+          </div>
+          <div className="flex flex-col items-end">
+            <span>Neural Load</span>
+            <span className="text-cyan-400">1.2ms</span>
+          </div>
+        </div>
+      </nav>
 
-          <form onSubmit={handleSend} className="p-8 bg-black/60 border-t border-white/5">
-            <div className="flex gap-4 max-w-5xl mx-auto relative group">
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-10 py-6 outline-none focus:border-[#00f3ff]/50 transition-all text-white placeholder-white/10 text-lg"
-                placeholder="Neural link ready..."
-              />
-              <button type="submit" disabled={loading} className="bg-gradient-to-r from-[#00f3ff] via-[#bc13fe] to-[#ff00ff] px-12 rounded-2xl font-black text-black uppercase hover:scale-105 transition-all active:scale-95 shadow-[0_0_30px_rgba(0,243,255,0.3)]">
-                {loading ? '...' : 'EXECUTE'}
-              </button>
+      {/* Neural Link Terminal (Messages) */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-12 space-y-10 custom-scrollbar">
+        {messages.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center space-y-6">
+             <div className="text-cyan-500 text-6xl opacity-10 animate-pulse">∞</div>
+             <p className="text-[10px] tracking-[1.5em] font-black text-white/20 uppercase">Awaiting Neural Handshake</p>
+          </div>
+        )}
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`relative p-6 max-w-[90%] md:max-w-[70%] border ${
+              m.role === 'user' 
+              ? 'bg-purple-500/5 border-purple-500/50 text-white' 
+              : 'bg-cyan-500/5 border-cyan-500/50 text-cyan-50'
+            }`}>
+              {/* Message Accents */}
+              <div className="absolute top-0 left-0 w-2 h-2 bg-inherit border-t border-l border-current"></div>
+              <p className="text-sm md:text-base tracking-wide font-light italic leading-relaxed">{m.content}</p>
             </div>
-          </form>
+          </div>
+        ))}
+        {loading && <div className="text-cyan-400 text-[10px] animate-pulse font-bold ml-2">SYNCING WITH NEURAL CORE...</div>}
+      </div>
+
+      {/* Control Console */}
+      <div className="p-6 md:p-10 border-t border-white/10 bg-[#050505]/90 backdrop-blur-xl">
+        <form onSubmit={handleSend} className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
+          <div className="relative flex-1 group">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="w-full bg-white/5 border-l-4 border-cyan-500 px-8 py-5 outline-none focus:bg-white/10 transition-all text-white font-mono text-sm uppercase tracking-widest"
+              placeholder="Inject Neural Payload..."
+            />
+            <div className="absolute top-0 right-0 p-2 text-[8px] text-cyan-500/40">INPUT_MOD: V2.1</div>
+          </div>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="group relative px-16 py-5 overflow-hidden border border-cyan-500 font-black text-xs uppercase tracking-[0.5em] transition-all hover:bg-cyan-500 hover:text-black"
+          >
+            <span className="relative z-10">{loading ? 'BUSY' : 'EXECUTE'}</span>
+            <div className="absolute inset-0 bg-cyan-400 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+          </button>
+        </form>
+        <div className="mt-4 text-center">
+           <span className="text-[7px] text-white/20 tracking-[1em] uppercase font-bold">Secure Neural Link Established - Likith Naidu Verified</span>
         </div>
       </div>
     </main>
