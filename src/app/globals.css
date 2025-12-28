@@ -14,44 +14,27 @@ body {
   overflow: hidden;
 }
 
-/* Input Clarity Fix */
-.neural-input {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* INPUT VISIBILITY FORCE */
+input {
   color: white !important;
-  caret-color: var(--cyan-core);
+  opacity: 1 !important;
+  visibility: visible !important;
+  -webkit-text-fill-color: white !important; /* Safari/Chrome Fix */
 }
 
-.neural-input::placeholder {
-  color: rgba(255, 255, 255, 0.2);
+input::placeholder {
+  color: rgba(255, 255, 255, 0.2) !important;
 }
 
-/* Glowing Mic & Buttons */
+/* Glass Panels */
+.glass-panel {
+  background: rgba(10, 10, 15, 0.9);
+  backdrop-filter: blur(40px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .shadow-glow {
-  box-shadow: 0 0 15px rgba(0, 246, 255, 0.4);
-}
-
-.shadow-glow-active {
-  box-shadow: 0 0 25px var(--cyan-core);
-  animation: pulse-glow 1.5s infinite;
-}
-
-@keyframes pulse-glow {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.7; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* Waveform Flair */
-.waveform-bar {
-  background: var(--cyan-core);
-  box-shadow: 0 0 10px var(--cyan-core);
-  animation: wave-data 0.6s infinite ease-in-out alternate;
-}
-
-@keyframes wave-data {
-  0% { height: 4px; transform: scaleX(0.8); }
-  100% { height: 12px; transform: scaleX(1.2); }
+  box-shadow: 0 0 20px rgba(0, 246, 255, 0.2);
 }
 
 .no-scrollbar::-webkit-scrollbar { width: 0; }

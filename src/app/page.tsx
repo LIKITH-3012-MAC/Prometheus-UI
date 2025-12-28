@@ -9,28 +9,25 @@ export default function PrometheusNeuralLink() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true); // Voice ON/OFF Toggle
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const scrollRef = useRef(null);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
-  // TTS Logic: Only speaks if Voice is enabled
   const speakTTS = (text) => {
     if (!isVoiceEnabled) return;
-    window.speechSynthesis.cancel(); // Stop any current speech
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.pitch = 0.85; 
     utterance.rate = 1.0;
     window.speechSynthesis.speak(utterance);
   };
 
-  // STT Logic
   const startSTT = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return alert("Speech recognition not supported.");
-
     const recognition = new SpeechRecognition();
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
@@ -58,7 +55,7 @@ export default function PrometheusNeuralLink() {
       setMessages(prev => [...prev, { role: 'assistant', content: data.content }]);
       if (isVoiceEnabled) speakTTS(data.content);
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "SYSTEM_ERROR: Neural sync interrupted." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "SYSTEM_ERROR: Neural link failed." }]);
     } finally {
       setIsLoading(false);
     }
@@ -66,80 +63,58 @@ export default function PrometheusNeuralLink() {
 
   return (
     <div className="relative h-screen w-screen bg-[#020203] flex items-center justify-center p-4 md:p-10 overflow-hidden">
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,242,255,0.02),transparent)] pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,242,255,0.03),transparent)] pointer-events-none z-0" />
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full max-w-6xl h-full flex flex-col rounded-[2.5rem] border border-white/5 bg-black/40 backdrop-blur-3xl relative z-10 overflow-hidden shadow-2xl">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-panel w-full max-w-6xl h-full flex flex-col rounded-[2.5rem] relative z-10 overflow-hidden shadow-2xl">
         
-        <header className="h-16 border-b border-white/5 flex items-center px-10 justify-between shrink-0 bg-white/[0.01]">
+        <header className="h-16 border-b border-white/5 flex items-center px-10 justify-between shrink-0 z-20 bg-black/20">
           <div className="flex items-center gap-3 text-cyan-500/50 font-mono text-[10px] tracking-[0.4em] uppercase">
-            <Cpu size={16} className="animate-pulse" /> Neural Link Established
+            <Cpu size={16} /> Neural Link established
           </div>
           <div className="flex items-center gap-4">
-             {/* Voice ON/OFF Toggle */}
-             <button 
-                onClick={() => {
-                  setIsVoiceEnabled(!isVoiceEnabled);
-                  if (isVoiceEnabled) window.speechSynthesis.cancel();
-                }}
-                className={`p-2 rounded-lg transition-all ${isVoiceEnabled ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-600 bg-white/5'}`}
-                title={isVoiceEnabled ? "Voice Output: ON" : "Voice Output: OFF"}
-             >
+             <button onClick={() => { setIsVoiceEnabled(!isVoiceEnabled); if (isVoiceEnabled) window.speechSynthesis.cancel(); }}
+                className={`p-2 rounded-lg transition-all ${isVoiceEnabled ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-600'}`}>
                 {isVoiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
              </button>
-             <button onClick={() => window.open('https://likith-portfolio.online/', '_blank')} className="text-white/20 hover:text-cyan-400 transition-all border-l border-white/10 pl-4"><Globe size={18}/></button>
+             <button onClick={() => window.open('https://likith-portfolio.online/', '_blank')} className="text-white/20 hover:text-cyan-400 ml-2"><Globe size={18}/></button>
           </div>
         </header>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 md:px-20 py-10 space-y-10 no-scrollbar relative">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 md:px-20 py-10 space-y-10 no-scrollbar relative z-10">
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center opacity-10">
               <Shield size={60} strokeWidth={0.5} className="text-cyan-500" />
-              <p className="mt-4 text-[10px] font-mono tracking-[0.8em] uppercase">Security Level: Elite</p>
+              <p className="mt-4 text-[10px] font-mono tracking-[0.8em]">SYSTEM_READY</p>
             </div>
           )}
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`p-6 rounded-2xl max-w-[85%] ${m.role === 'user' ? 'bg-cyan-500/10 border-r-2 border-cyan-500' : 'bg-white/5 border-l-2 border-slate-700'}`}>
-                <div className="flex justify-between items-center mb-2">
-                   <span className="text-[8px] font-mono opacity-20 uppercase tracking-widest">{m.role}</span>
-                   {m.role === 'assistant' && isVoiceEnabled && (
-                     <button onClick={() => speakTTS(m.content)} className="opacity-30 hover:opacity-100 text-cyan-500"><Volume2 size={10}/></button>
-                   )}
-                </div>
                 <div className="text-sm md:text-base text-slate-100 leading-relaxed"><ReactMarkdown>{m.content}</ReactMarkdown></div>
               </div>
             </div>
           ))}
-          {isLoading && <div className="text-cyan-500 font-mono text-[10px] animate-pulse uppercase tracking-[0.2em]">Processing...</div>}
+          {isLoading && <div className="text-cyan-500 font-mono text-[10px] animate-pulse uppercase tracking-widest">Inference...</div>}
         </div>
 
-        <footer className="p-8 border-t border-white/5 bg-black/60 relative">
-          {isListening && (
-            <div className="absolute -top-10 left-0 w-full flex justify-center gap-1 items-end h-8">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="waveform-bar w-1 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(0,246,255,0.5)]" style={{ height: '4px', animation: 'wave-data 0.6s infinite ease-in-out alternate', animationDelay: `${i * 0.05}s` }} />
-              ))}
-            </div>
-          )}
-
+        {/* INPUT AREA - FORCE TOP LAYER */}
+        <footer className="p-8 border-t border-white/5 bg-[#050505] relative z-50">
           <div className="max-w-4xl mx-auto flex items-center gap-4">
-            <button 
-              onClick={startSTT}
-              className={`p-4 rounded-2xl transition-all ${isListening ? 'bg-cyan-500 text-black shadow-[0_0_20px_#00f6ff]' : 'bg-white/5 text-slate-500 hover:bg-white/10 border border-white/5'}`}
-            >
+            <button onClick={startSTT} className={`p-4 rounded-2xl transition-all ${isListening ? 'bg-cyan-500 text-black shadow-glow' : 'bg-white/5 text-slate-500'}`}>
               {isListening ? <Mic size={20} /> : <MicOff size={20} />}
             </button>
 
-            <div className="flex-1 bg-white/[0.03] border border-white/10 rounded-2xl flex items-center p-1 focus-within:border-cyan-500/40 transition-all shadow-inner">
+            <div className="flex-1 bg-white/[0.05] border border-white/10 rounded-2xl flex items-center px-4 transition-all focus-within:border-cyan-500/50 shadow-inner">
+              <span className="text-cyan-900 font-mono mr-2">#</span>
               <input 
                 autoFocus
-                className="flex-1 bg-transparent py-4 px-6 outline-none text-white text-base placeholder-slate-800 font-sans block w-full"
-                placeholder={isListening ? "Listening..." : "Inject Command..."}
+                className="flex-1 bg-transparent py-5 outline-none text-white text-base font-sans block w-full relative z-50"
+                placeholder="INITIALIZE COMMAND..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleExecute()}
               />
-              <button onClick={handleExecute} className="p-4 bg-cyan-600 rounded-xl hover:bg-cyan-400 transition-all shadow-[0_0_15px_rgba(0,242,255,0.3)] active:scale-95">
+              <button onClick={handleExecute} className="ml-2 p-3 bg-cyan-600 rounded-xl hover:bg-cyan-400 transition-all shadow-glow active:scale-95">
                 <Send size={18} className="text-black" />
               </button>
             </div>
