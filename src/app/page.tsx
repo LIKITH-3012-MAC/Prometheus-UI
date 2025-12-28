@@ -1,57 +1,89 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useChat } from 'ai/react';
 
-export default function PrometheusNeuralLink() {
+export default function PrometheusAdvanced() {
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: '/api/chat',
   });
 
   return (
-    <main className="main-layout min-h-screen">
-      <header className="w-full py-12 text-center">
-        <h1 className="header-text text-6xl md:text-8xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#00f3ff] via-[#bc13fe] to-[#ff00ff] animate-pulse">
+    <main className="min-h-screen p-4 md:p-10 flex flex-col items-center">
+      {/* Neural Link Header */}
+      <header className="mb-10 text-center">
+        <h1 className="text-vibrant text-6xl md:text-8xl font-black tracking-tighter">
           PROMETHEUS
         </h1>
-        <div className="h-1 w-32 bg-gradient-to-r from-[#00f3ff] to-[#ff00ff] mx-auto mt-4 rounded-full shadow-[0_0_20px_#00f3ff]"></div>
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <span className="h-[1px] w-20 bg-cyan-500"></span>
+          <span className="text-cyan-400 text-xs font-bold tracking-[0.5em] uppercase">V2.0 Neural Link</span>
+          <span className="h-[1px] w-20 bg-cyan-500"></span>
+        </div>
       </header>
 
-      <div className="chat-card glass-card flex flex-col">
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
-          {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] p-5 rounded-3xl backdrop-blur-md ${
-                m.role === 'user' 
-                ? 'bg-gradient-to-br from-[#bc13fe] to-[#7000ff] text-white shadow-[0_10px_30px_rgba(188,19,254,0.3)]' 
-                : 'glass-card border-l-4 border-[#00f3ff] text-[#e0e0e0]'
-              }`}>
-                <p className="text-sm md:text-base leading-relaxed">{m.content}</p>
-              </div>
+      {/* Main Command Console */}
+      <div className="hologram-card w-full max-w-5xl flex flex-col md:flex-row h-[75vh]">
+        
+        {/* Left Stats Panel (Desktop Only) */}
+        <div className="hidden md:flex w-64 border-r border-white/10 p-6 flex-col gap-6">
+          <div className="space-y-2">
+            <p className="text-[10px] text-purple-400 font-bold uppercase">System Integrity</p>
+            <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full w-[94%] bg-cyan-500 animate-pulse"></div>
             </div>
-          ))}
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 border-t border-white/10 bg-black/20">
-          <div className="flex gap-4">
-            <input
-              value={input}
-              onChange={handleInputChange}
-              className="flex-1 bg-white/5 border border-white/20 rounded-2xl px-6 py-4 outline-none focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff] transition-all text-white"
-              placeholder="Inject neural thought..."
-            />
-            <button type="submit" className="neural-btn px-8 hover:scale-105 active:scale-95 transition-transform">
-              EXECUTE
-            </button>
           </div>
-        </form>
-      </div>
-
-      <footer className="flex flex-wrap justify-center gap-6 mt-10 pb-10">
-        <div className="glass-card px-8 py-3 rounded-2xl border-[#bc13fe]/40 text-[10px] tracking-widest font-black text-[#00f3ff]">
-          CORE: ONLINE
+          <div className="space-y-2">
+            <p className="text-[10px] text-pink-400 font-bold uppercase">Core Status</p>
+            <p className="text-xs font-mono text-cyan-200">ACTIVE_MODE_70B</p>
+          </div>
         </div>
-        <div className="glass-card px-8 py-3 rounded-2xl border-[#00f3ff]/40 text-[10px] tracking-widest font-black text-[#ff00ff]">
-          NEURAL: ACTIVE
+
+        {/* Chat Section */}
+        <div className="flex-1 flex flex-col relative">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {messages.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full opacity-20">
+                <p className="text-4xl">🔱</p>
+                <p className="text-sm font-bold mt-4">Awaiting Neural Input...</p>
+              </div>
+            )}
+            {messages.map((m, i) => (
+              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`p-5 rounded-2xl max-w-[90%] ${
+                  m.role === 'user' 
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(188,19,254,0.4)]' 
+                  : 'bg-white/5 border border-white/10 text-cyan-100 backdrop-blur-md'
+                }`}>
+                  {m.content}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Input Bar */}
+          <form onSubmit={handleSubmit} className="p-6 bg-black/40 backdrop-blur-xl">
+            <div className="relative group">
+              <input
+                className="w-full bg-white/5 border border-white/20 rounded-2xl px-6 py-5 outline-none focus:border-cyan-500 transition-all text-white pr-20"
+                placeholder="Initialize communication..."
+                value={input}
+                onChange={handleInputChange}
+              />
+              <button className="absolute right-3 top-3 bottom-3 bg-gradient-to-r from-cyan-500 to-purple-500 px-6 rounded-xl font-black text-black text-xs hover:scale-105 transition-transform">
+                EXECUTE
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      {/* Floating Status UI */}
+      <footer className="mt-8 flex gap-4">
+        <div className="px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-[10px] text-cyan-400 font-bold animate-pulse">
+           SYNC: STABLE
+        </div>
+        <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full text-[10px] text-purple-400 font-bold">
+           GROQ: CONNECTED
         </div>
       </footer>
     </main>

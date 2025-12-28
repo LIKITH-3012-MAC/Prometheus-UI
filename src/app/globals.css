@@ -6,113 +6,52 @@
   --neon-cyan: #00f3ff;
   --neon-purple: #bc13fe;
   --neon-pink: #ff00ff;
-  --deep-space: #050510;
-  --glass: rgba(255, 255, 255, 0.03);
-  --border-glow: rgba(0, 243, 255, 0.3);
-}
-
-* {
-  box-sizing: border-box;
-  scroll-behavior: smooth;
+  --glass-bg: rgba(255, 255, 255, 0.03);
 }
 
 body {
-  background: var(--deep-space);
+  background: #020205;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(188, 19, 254, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(0, 243, 255, 0.15) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(255, 0, 255, 0.1) 0px, transparent 50%);
-  color: #e0e0e0;
-  min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+    linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
   overflow-x: hidden;
 }
 
-/* --- Animated Colorful Background Mesh --- */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: url("https://grainy-gradients.vercel.app/noise.svg");
-  opacity: 0.05;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* --- Hyper-Responsive Containers --- */
-.main-layout {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem;
-  gap: 2rem;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-/* --- The Colorful Glassmorphic Chat Card --- */
-.chat-card {
-  background: var(--glass);
-  backdrop-filter: blur(20px) saturate(180%);
+/* Holographic Card Effect */
+.hologram-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(25px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  width: 100%;
-  height: 70vh;
+  box-shadow: 0 0 50px rgba(188, 19, 254, 0.2);
+  border-radius: 30px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
 }
 
-.chat-card::after {
-  content: '';
+.hologram-card::before {
+  content: "";
   position: absolute;
-  top: -2px; left: -2px; right: -2px; bottom: -2px;
-  background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
-  z-index: -1;
-  filter: blur(10px);
-  opacity: 0.2;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.2), transparent);
+  transition: 0.5s;
 }
 
-/* --- Buttons & Toggles: Cyberpunk Style --- */
-.neural-btn {
-  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
-  color: black;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 15px var(--border-glow);
-}
+.hologram-card:hover::before { left: 100%; }
 
-.neural-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 25px var(--neon-cyan);
-  filter: brightness(1.2);
-}
-
-/* --- Mobile Specific Optimization (Small Screens) --- */
-@media (max-width: 640px) {
-  .main-layout { padding: 0.5rem; }
-  .chat-card { height: 80vh; border-radius: 16px; }
-  .header-text { font-size: 1.5rem !important; }
-  .neural-btn { width: 100%; font-size: 0.8rem; }
-}
-
-/* --- Scrollbar Styling --- */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
+/* Advanced Custom Scrollbar */
+::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(var(--neon-cyan), var(--neon-purple));
-  border-radius: 10px;
+  border-radius: 20px;
 }
 
-/* --- Animations for Features --- */
-@keyframes neonPulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+/* Multi-color Typography */
+.text-vibrant {
+  background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.5));
 }
-.active-waveform { animation: neonPulse 1.5s infinite; }
