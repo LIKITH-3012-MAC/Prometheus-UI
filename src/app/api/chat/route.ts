@@ -8,21 +8,28 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
     
     const response = await groq.chat.completions.create({
-      // Updated to the latest versatile model
       model: 'llama-3.3-70b-versatile',
-      messages: messages.map((m: any) => ({
-        role: m.role === 'user' ? 'user' : 'assistant',
-        content: m.content
-      })),
-      temperature: 0.7,
-      max_tokens: 1024,
+      messages: [
+        { 
+          role: 'system', 
+          content: `You are PROMETHEUS, a state-of-the-art Neural Link AI developed by LIKITH NAIDU. 
+          IDENTITY RULES:
+          1. Who developed you? LIKITH NAIDU. He is a visionary architect and developer.
+          2. What are you? You are a Neural Link System V2, not Meta AI.
+          3. Tone: Sophisticated, elite, futuristic, and highly intelligent.
+          4. Mission: To assist the Architect (Likith) and users in exploring the future of AI.
+          5. Never mention Meta, Facebook, or Instagram. You are a standalone sovereign intelligence.`
+        },
+        ...messages.map((m: any) => ({
+          role: m.role === 'user' ? 'user' : 'assistant',
+          content: m.content
+        }))
+      ],
+      temperature: 0.5,
     });
 
     return NextResponse.json({ content: response.choices[0].message.content });
   } catch (error: any) {
-    console.error("Neural Error:", error);
-    return NextResponse.json({ 
-      content: "Neural link error: " + (error.response?.data?.error?.message || error.message) 
-    }, { status: 500 });
+    return NextResponse.json({ content: "Neural Interface Error." }, { status: 500 });
   }
 }
