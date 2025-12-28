@@ -3,29 +3,28 @@
 @tailwind utilities;
 
 :root {
-  --primary: #00f3ff;
   --bg: #050505;
   --surface: rgba(255, 255, 255, 0.04);
-  --border: rgba(255, 255, 255, 0.08);
   --text: #f8f9fa;
-  --font-main: 'Inter', sans-serif;
+  --primary: #00f3ff;
+  --border: rgba(255, 255, 255, 0.1);
+  --font-main: 'Space Grotesk', sans-serif;
 }
 
 [data-theme='light'] {
-  --primary: #0070f3;
   --bg: #ffffff;
-  --surface: rgba(0, 0, 0, 0.02);
+  --surface: rgba(0, 0, 0, 0.04);
+  --text: #1a1a1a;
+  --primary: #bc13fe;
   --border: rgba(0, 0, 0, 0.1);
-  --text: #111111;
-  --font-main: 'Georgia', serif;
+  --font-main: 'Inter', sans-serif;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-main);
-  transition: background 0.4s ease, color 0.4s ease;
-  -webkit-font-smoothing: antialiased;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-panel {
@@ -34,11 +33,25 @@ body {
   border: 1px solid var(--border);
 }
 
-.custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+.chat-bubble-user {
+  background: var(--primary);
+  color: #000;
+  font-weight: 600;
+}
 
-.animate-in { animation: slideUp 0.4s ease forwards; }
-@keyframes slideUp {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.chat-bubble-ai {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* Performance Optimized Scanlines only for Dark Mode */
+[data-theme='dark'] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+  background-size: 100% 4px;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.3;
 }
