@@ -1,44 +1,36 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function PrometheusSupreme() {
+export default function PrometheusProduct() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isTtsEnabled, setIsTtsEnabled] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef(null);
 
-  // Speech to Text (STT)
+  // Text-to-Speech Logic
+  const speak = (text) => {
+    if (!isTtsEnabled) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Speech-to-Text Logic
   const startSTT = () => {
     const SpeechRecognition = window.webkitSpeechRecognition || (window as any).SpeechRecognition;
-    if (!SpeechRecognition) return alert("Browser does not support STT");
-    
+    if (!SpeechRecognition) return alert("Browser not supported");
     const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
     recognition.onstart = () => setIsListening(true);
-    recognition.onresult = (e: any) => {
-      setInput(e.results[0][0].transcript);
-      setIsListening(false);
-    };
-    recognition.onerror = () => setIsListening(false);
+    recognition.onresult = (e) => setInput(e.results[0][0].transcript);
+    recognition.onend = () => setIsListening(false);
     recognition.start();
   };
 
-  // Text to Speech (TTS)
-  const triggerTTS = (text: string) => {
-    window.speechSynthesis.cancel();
-    const synth = window.speechSynthesis;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 0.8; // Deep Tech Voice
-    synth.speak(utterance);
-  };
-
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages]);
-
-  const handleSend = async (e: any) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (!input || loading) return;
     const userMsg = { role: 'user', content: input };
@@ -54,74 +46,76 @@ export default function PrometheusSupreme() {
       });
       const data = await res.json();
       setMessages(prev => [...prev, { role: 'assistant', content: data.content }]);
-      triggerTTS(data.content);
+      speak(data.content);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="h-screen w-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-black">
-      <div className="nebula-bg"></div>
-      
-      <div className="w-full max-w-7xl flex flex-col h-[90vh] hologram-card rounded-[40px] overflow-hidden">
-        {/* Header HUD */}
-        <header className="p-8 border-b border-white/5 flex justify-between items-center bg-black/20">
-          <div>
-            <h1 className="text-4xl font-black tracking-tighter glow-text bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-              PROMETHEUS <span className="text-xs italic opacity-50">SUPREME</span>
-            </h1>
-            <p className="text-[9px] tracking-[1em] text-cyan-500 uppercase font-bold mt-1">Architect: Likith Naidu Anumakonda</p>
-          </div>
-          <div className="flex gap-2 h-4">
-             {[1,2,3,4].map(i => <div key={i} className="voice-indicator" style={{animationDelay: `${i*0.2}s`}}></div>)}
-          </div>
-        </header>
+    <main className="h-screen flex flex-col items-center bg-[#050505] p-4 md:p-8">
+      {/* Top Professional Header */}
+      <nav className="w-full max-w-6xl flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-white uppercase">Prometheus <span className="text-cyan-500">v3.0</span></h1>
+          <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-[0.2em]">Developed by Likith Naidu</p>
+        </div>
+        
+        <div className="flex items-center gap-4 bg-zinc-900/50 p-1 rounded-full border border-zinc-800">
+          <button 
+            onClick={() => setIsTtsEnabled(!isTtsEnabled)}
+            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all ${isTtsEnabled ? 'bg-cyan-500 text-black' : 'text-zinc-500'}`}
+          >
+            TTS {isTtsEnabled ? 'ON' : 'OFF'}
+          </button>
+          <button 
+            onClick={startSTT}
+            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-zinc-500'}`}
+          >
+            {isListening ? 'LISTENING' : 'VOICE'}
+          </button>
+        </div>
+      </nav>
 
-        {/* Neural Viewport */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 md:p-12 space-y-8 scroll-smooth">
+      {/* Main Product Interface */}
+      <div className="glass-panel w-full max-w-6xl h-full rounded-2xl flex flex-col overflow-hidden relative">
+        <div className="flex-1 overflow-y-auto p-6 md:p-12 space-y-8 custom-scrollbar">
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center opacity-20">
-              <div className="w-24 h-24 border-2 border-cyan-500 rounded-full animate-ping mb-4"></div>
-              <p className="text-xs tracking-[1.5em] font-black uppercase">Voice Link Active</p>
+              <p className="text-sm font-medium tracking-widest uppercase">System Ready</p>
             </div>
           )}
           {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-4`}>
-              <div className={`p-6 rounded-[24px] max-w-[85%] border backdrop-blur-3xl shadow-2xl ${
-                m.role === 'user' 
-                ? 'bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border-purple-500/20' 
-                : 'bg-white/5 border-white/10 text-cyan-50'
+            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in`}>
+              <div className={`max-w-[80%] p-5 rounded-xl text-sm md:text-base leading-relaxed ${
+                m.role === 'user' ? 'bg-cyan-500 text-black font-medium' : 'bg-zinc-900 border border-zinc-800 text-zinc-100'
               }`}>
-                <p className="text-sm md:text-base leading-relaxed tracking-wide font-light">{m.content}</p>
+                {m.content}
               </div>
             </div>
           ))}
-          {loading && <div className="text-cyan-400 text-[10px] animate-pulse font-black uppercase tracking-widest">Processing Neural Signal...</div>}
+          {loading && <div className="text-cyan-500 text-[10px] font-bold animate-pulse tracking-widest">PROCESSING...</div>}
         </div>
 
-        {/* Command Input Console */}
-        <div className="p-8 bg-black/40 border-t border-white/5">
-          <form onSubmit={handleSend} className="max-w-5xl mx-auto flex gap-4">
-            <button 
-              type="button"
-              onClick={startSTT}
-              className={`p-5 rounded-2xl border transition-all ${isListening ? 'bg-red-500/20 border-red-500 animate-pulse' : 'bg-white/5 border-white/10 hover:border-cyan-500'}`}
-            >
-              🎤
-            </button>
+        {/* Flat Input Bar */}
+        <form onSubmit={handleSend} className="p-6 bg-zinc-900/30 border-t border-zinc-800">
+          <div className="max-w-4xl mx-auto flex gap-4">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-8 py-5 outline-none focus:border-cyan-500/50 transition-all text-white placeholder-white/20 font-light"
-              placeholder="Inject command or speak..."
+              className="flex-1 neural-input rounded-xl px-6 py-4 text-sm md:text-base"
+              placeholder="Send a command..."
             />
-            <button type="submit" className="bg-gradient-to-r from-cyan-500 to-purple-600 px-12 rounded-2xl font-black text-black uppercase hover:shadow-[0_0_30px_rgba(0,243,255,0.4)] transition-all">
+            <button type="submit" className="bg-white text-black px-8 rounded-xl font-bold text-xs uppercase hover:bg-cyan-500 transition-colors">
               Execute
             </button>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
+
+      <footer className="mt-6 text-[9px] text-zinc-600 font-medium tracking-[0.2em] uppercase">
+        © 2025 Likith Naidu Anumakonda • AI Protocol Architecture
+      </footer>
     </main>
   );
 }
