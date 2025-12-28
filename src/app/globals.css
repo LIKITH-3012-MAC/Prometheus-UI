@@ -3,52 +3,43 @@
 @tailwind utilities;
 
 :root {
-  --obsidian-dark: #020203;
-  --cyan-glow: #00f2ff;
-  --glass-white: rgba(255, 255, 255, 0.05);
+  --obsidian-core: #020203;
+  --cyan-accent: #00f2ff;
 }
 
 body {
-  background: var(--obsidian-dark);
+  background: var(--obsidian-core);
   color: #ccd6f6;
   font-family: 'Inter', sans-serif;
   overflow: hidden;
 }
 
-/* World Class Glass Panel */
+/* INPUT VISIBILITY PROTOCOL */
+input, textarea {
+  color: #ffffff !important; /* Force white text */
+  background: transparent;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Glass Panels */
 .glass-panel {
-  background: rgba(10, 10, 12, 0.8);
-  backdrop-filter: blur(25px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 50px rgba(0,0,0,0.8);
+  background: rgba(10, 10, 15, 0.8);
+  backdrop-filter: blur(30px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Search Bar Text Visibility FIX */
-.search-input {
-  background: rgba(255, 255, 255, 0.05);
-  color: white !important; /* Pure white text for search */
-  border: 1px solid rgba(0, 242, 255, 0.3);
-  caret-color: var(--cyan-glow);
-}
-
-.search-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-/* Neural Chat Bubbles */
+/* Chat UI */
 .chat-bubble-ai {
-  background: rgba(255, 255, 255, 0.02);
-  border-left: 3px solid var(--cyan-glow);
-  padding: 1.5rem;
-  border-radius: 0 20px 20px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--cyan-accent);
 }
 
 .chat-bubble-user {
-  background: rgba(0, 242, 255, 0.08);
-  border-right: 3px solid var(--cyan-glow);
-  padding: 1.5rem;
-  border-radius: 20px 0 20px 20px;
+  background: rgba(0, 242, 255, 0.05);
+  border-right: 3px solid var(--cyan-accent);
 }
 
-/* Scrollbar hidden for software feel */
 ::-webkit-scrollbar { width: 0; }
