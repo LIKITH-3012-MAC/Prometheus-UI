@@ -6,52 +6,24 @@
   --neon-cyan: #00f3ff;
   --neon-purple: #bc13fe;
   --neon-pink: #ff00ff;
-  --glass-bg: rgba(255, 255, 255, 0.03);
 }
 
 body {
-  background: #020205;
-  background-image: 
-    linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
-  background-size: 50px 50px;
-  color: #fff;
-  font-family: 'Space Grotesk', sans-serif;
+  background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
+  color: white;
+  min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* Holographic Card Effect */
-.hologram-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(25px);
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 50px rgba(188, 19, 254, 0.2);
-  border-radius: 30px;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
 }
 
-.hologram-card::before {
-  content: "";
-  position: absolute;
-  top: 0; left: -100%; width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.2), transparent);
-  transition: 0.5s;
-}
-
-.hologram-card:hover::before { left: 100%; }
-
-/* Advanced Custom Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(var(--neon-cyan), var(--neon-purple));
-  border-radius: 20px;
-}
-
-/* Multi-color Typography */
 .text-vibrant {
   background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.5));
 }
