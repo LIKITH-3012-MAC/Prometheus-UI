@@ -8,16 +8,21 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
     
     const response = await groq.chat.completions.create({
-      model: 'llama3-8b-8192',
+      // Updated to the latest versatile model
+      model: 'llama-3.3-70b-versatile',
       messages: messages.map((m: any) => ({
         role: m.role === 'user' ? 'user' : 'assistant',
         content: m.content
       })),
+      temperature: 0.7,
+      max_tokens: 1024,
     });
 
     return NextResponse.json({ content: response.choices[0].message.content });
   } catch (error: any) {
     console.error("Neural Error:", error);
-    return NextResponse.json({ content: "Neural link error: " + error.message });
+    return NextResponse.json({ 
+      content: "Neural link error: " + (error.response?.data?.error?.message || error.message) 
+    }, { status: 500 });
   }
 }
