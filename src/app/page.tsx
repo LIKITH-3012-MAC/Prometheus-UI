@@ -1,57 +1,32 @@
 "use client";
-
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-/* ------------------ Types ------------------ */
-type Message = {
-  role: "user" | "assistant";
-  content: string;
-};
-
-/* ------------------ Component ------------------ */
-export default function PrometheusUltimate() {
-  const [messages, setMessages] = useState<Message[]>([]);
+export default function PrometheusV4() {
+  const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [typingText, setTypingText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-
+  const [isTts, setIsTts] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  /* ------------------ Auto Scroll ------------------ */
   useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messages, typingText]);
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages]);
 
-  /* ------------------ Typing Effect ------------------ */
-  const typeWriter = async (fullText: string) => {
-    setIsTyping(true);
-    setTypingText("");
-
-    for (let i = 0; i < fullText.length; i++) {
-      setTypingText((prev) => prev + fullText[i]);
-      await new Promise((r) => setTimeout(r, 12)); // ⏱️ typing speed (ms)
-    }
-
-    setIsTyping(false);
-    setMessages((p) => [...p, { role: "assistant", content: fullText }]);
-    setTypingText("");
+  const speak = (text: string) => {
+    if (!isTts) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/[#*🔹📌⚠️•]/g, ''));
+    window.speechSynthesis.speak(u);
   };
 
-  /* ------------------ Send Message ------------------ */
-  const handleSend = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!input.trim() || loading || isTyping) return;
-
-    const userMsg: Message = { role: "user", content: input };
-    setMessages((p) => [...p, userMsg]);
+  const handleSend = async () => {
+    if (!input || loading) return;
+    const userMsg = { role: "user", content: input };
+    setMessages(p => [...p, userMsg]);
     setInput("");
     setLoading(true);
 
@@ -61,67 +36,43 @@ export default function PrometheusUltimate() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
-
       const data = await res.json();
-      await typeWriter(data.content);
+      setMessages(p => [...p, { role: "assistant", content: data.content }]);
+      speak(data.content);
     } finally {
       setLoading(false);
     }
   };
 
-  /* ------------------ UI ------------------ */
   return (
-    <main className="min-h-screen bg-[#0b0b0b] text-white flex flex-col font-sans">
-      {/* Header */}
-      <nav className="p-5 border-b border-white/5 flex justify-between items-center sticky top-0 bg-[#0b0b0b]/80 backdrop-blur-xl z-50">
-        <div>
-          <h1 className="text-xl font-black tracking-tight">PROMETHEUS</h1>
-          <p className="text-[9px] tracking-[0.35em] text-cyan-500 uppercase font-bold">
-            Neural Architect · Likith Naidu
-          </p>
-        </div>
+    <main className="min-h-screen bg-[#0d0d0d] text-[#e3e3e3] flex flex-col font-sans">
+      <nav className="p-6 border-b border-white/5 flex justify-between items-center backdrop-blur-xl sticky top-0 z-50">
+        <h1 className="text-xl font-black tracking-tighter text-white uppercase">Prometheus <span className="text-cyan-500 text-[10px]">V4.0</span></h1>
+        <button onClick={() => setIsTts(!isTts)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold border transition-all ${isTts ? 'bg-cyan-500 text-black' : 'border-white/10 text-zinc-500'}`}>TTS {isTts ? 'ON' : 'OFF'}</button>
       </nav>
 
-      {/* Chat Area */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 py-10 md:max-w-4xl md:mx-auto space-y-10"
-      >
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-10 md:px-[22%] space-y-8 scroll-smooth">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div
-              className={`max-w-[95%] p-6 rounded-3xl ${
-                m.role === "user"
-                  ? "bg-[#161616] border border-white/10"
-                  : "bg-white/5 border border-white/10 backdrop-blur-xl"
-              }`}
-            >
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
+            <div className={`max-w-[100%] ${m.role === 'user' ? 'bg-[#1a1a1a] px-6 py-3 rounded-2xl border border-white/5' : 'w-full'}`}>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-                className="prose prose-invert max-w-none"
+                className="prose prose-invert max-w-none text-sm md:text-base leading-7"
                 components={{
-                  code({ inline, className, children }: any) {
-                    const match = /language-(\w+)/.exec(className || "");
+                  code({ node, inline, className, children, ...props }: any) {
+                    const match = /language-(\w+)/.exec(className || '');
                     return !inline && match ? (
-                      <div className="relative group my-6">
-                        <button
-                          onClick={() =>
-                            navigator.clipboard.writeText(String(children))
-                          }
-                          className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 bg-white/10 px-3 py-1 rounded text-[10px]"
-                        >
-                          Copy
-                        </button>
-                        <SyntaxHighlighter style={atomDark} language={match[1]}>
-                          {String(children).replace(/\n$/, "")}
+                      <div className="my-6 rounded-xl overflow-hidden shadow-2xl border border-white/5">
+                        <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>
+                          {String(children).replace(/\n$/, '')}
                         </SyntaxHighlighter>
                       </div>
                     ) : (
-                      <code className="bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded">
-                        {children}
-                      </code>
+                      <code className="bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded font-mono" {...props}>{children}</code>
                     );
                   },
+                  h2: ({children}) => <h2 className="text-xl font-bold text-white mt-8 mb-4">{children}</h2>,
+                  p: ({children}) => <p className="mb-4 text-[#cccccc]">{children}</p>,
                 }}
               >
                 {m.content}
@@ -129,60 +80,21 @@ export default function PrometheusUltimate() {
             </div>
           </div>
         ))}
-
-        {/* Typing Preview */}
-        {isTyping && (
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-            <ReactMarkdown className="prose prose-invert max-w-none">
-              {typingText + "▍"}
-            </ReactMarkdown>
-          </div>
-        )}
-
-        {loading && !isTyping && (
-          <p className="text-cyan-500 text-[10px] tracking-[0.4em] uppercase animate-pulse">
-            Prometheus is reasoning...
-          </p>
-        )}
+        {loading && <div className="text-cyan-500 animate-pulse text-[10px] font-black uppercase tracking-widest">Generating Link...</div>}
       </div>
 
-      {/* Search / Command Input */}
-      <footer className="p-6 bg-[#0b0b0b]">
-        <form
-          onSubmit={handleSend}
-          className="max-w-4xl mx-auto relative"
-        >
+      <footer className="p-6 md:px-[22%] bg-[#0d0d0d]">
+        <div className="relative flex items-center bg-[#1a1a1a] border border-white/10 rounded-[30px] px-6 py-1 focus-within:border-cyan-500/50 transition-all">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask anything… (structured, exam-ready, precise)"
-            className="
-              w-full
-              bg-[#121212]
-              text-white
-              border border-white/15
-              rounded-2xl
-              px-8
-              py-5
-              outline-none
-              placeholder:text-zinc-500
-              focus:border-cyan-500/70
-              focus:ring-2
-              focus:ring-cyan-500/20
-              transition-all
-            "
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Ask Prometheus..."
+            className="flex-1 bg-transparent py-4 outline-none text-base placeholder:text-zinc-700"
           />
-          <button
-            type="submit"
-            className="absolute right-3 top-3 bottom-3 bg-cyan-500 text-black px-8 rounded-xl font-black text-xs uppercase hover:scale-105 transition-transform"
-          >
-            Send
-          </button>
-        </form>
-
-        <p className="text-center text-[8px] text-zinc-600 mt-6 tracking-[0.45em] uppercase font-bold">
-          World-Class Neural UI · v3.0
-        </p>
+          <button onClick={handleSend} className="bg-white text-black px-6 py-2 rounded-2xl font-black text-[10px] uppercase">Execute</button>
+        </div>
+        <p className="text-center text-[8px] text-zinc-700 mt-4 uppercase tracking-[0.5em] font-bold">Neural Link Engine | Likith Naidu</p>
       </footer>
     </main>
   );
