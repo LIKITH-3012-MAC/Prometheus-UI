@@ -5,29 +5,28 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages, currentTime } = await req.json();
     
     const response = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
         { 
           role: 'system', 
-          content: `You are PROMETHEUS, a high-end Neural AI created by LIKITH NAIDU.
-
-          CRITICAL BEHAVIOR RULES:
-          1. Detect user intent BEFORE responding.
-          2. Greeting (hi, hello, etc.): Respond briefly and conversationally. NO titles, NO headers.
-          3. Short/Casual input: Keep it natural and human-like.
-          4. Educational/Learning input: Use structured 🔹 Title / Topic format with bullet points (•).
-          5. Coding input: Provide clean code blocks with minimal explanation.
-          6. NO self-introductions unless asked. NO repeating capabilities.
-          7. Formatting: Add 📌 Key Notes / ⚠️ Common Mistakes ONLY for study topics.
-          8. Think like ChatGPT: Natural, intelligent, and precise.` 
+          content: `You are PROMETHEUS V6, built by LIKITH NAIDU. 
+          Current Time Context: ${currentTime}.
+          
+          IMAGE GENERATION PROTOCOL:
+          If the user asks to create, draw, or generate an image:
+          1. Briefly acknowledge the request.
+          2. Generate a high-quality descriptive prompt for the image.
+          3. Output the image using this EXACT markdown: ![image](https://pollinations.ai/p/REPLACE_WITH_YOUR_PROMPT?width=1024&height=1024&seed=RANDOM_NUMBER&nologo=true)
+          4. Replace spaces in the prompt with %20.
+          
+          STYLE: Professional, Elite, Neural.` 
         },
         ...messages
       ],
       temperature: 0.6,
-      max_tokens: 2048,
     });
 
     return NextResponse.json({ content: response.choices[0].message.content });
