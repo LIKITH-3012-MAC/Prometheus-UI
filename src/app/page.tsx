@@ -1,99 +1,182 @@
 "use client";
+
 import React, { useState, useEffect, useRef } from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-export default function PrometheusGeminiUI() {
-  const { data: session } = useSession();
-  const [messages, setMessages] = useState<any[]>([]);
+/* ------------------ Types ------------------ */
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+/* ------------------ Component ------------------ */
+export default function PrometheusUltimate() {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isTts, setIsTts] = useState(true);
+  const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  /* ------------------ Auto Scroll ------------------ */
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input || loading) return;
-    const userMsg = { role: "user", content: input };
-    setMessages(p => [...p, userMsg]);
+  /* ------------------ Text to Speech ------------------ */
+  const speak = (text: string) => {
+    if (!isTts || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  /* ------------------ Speech to Text ------------------ */
+  const startSTT = () => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) return alert("Speech recognition not supported");
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onresult = (e: any) =>
+      setInput(e.results[0][0].transcript);
+    recognition.start();
+  };
+
+  /* ------------------ Send Message ------------------ */
+  const handleSend = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!input.trim() || loading) return;
+
+    const userMsg: Message = { role: "user", content: input };
+    setMessages((p) => [...p, userMsg]);
     setInput("");
     setLoading(true);
-    
+
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
+
       const data = await res.json();
-      setMessages(p => [...p, { role: "assistant", content: data.content }]);
-    } catch (err) {
-      console.error(err);
+      const assistantMsg: Message = {
+        role: "assistant",
+        content: data.content,
+      };
+
+      setMessages((p) => [...p, assistantMsg]);
+      speak(data.content);
     } finally {
       setLoading(false);
     }
   };
 
+  /* ------------------ UI ------------------ */
   return (
-    <div className="min-h-screen flex flex-col bg-[#0e0e0e] text-[#e3e3e3] font-sans">
+    <main className="min-h-screen bg-[#0a0a0a] text-[#e0e0e0] flex flex-col font-sans">
       {/* Header */}
-      <nav className="p-5 border-b border-white/5 flex justify-between items-center backdrop-blur-xl sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-lg shadow-lg shadow-cyan-500/20"></div>
-          <h1 className="text-xl font-bold tracking-tight">PROMETHEUS <span className="text-xs text-cyan-500 font-mono opacity-50">PRO</span></h1>
+      <nav className="p-5 border-b border-white/5 flex justify-between items-center backdrop-blur-md sticky top-0 z-50">
+        <div>
+          <h1 className="text-xl font-black">PROMETHEUS</h1>
+          <p className="text-[9px] tracking-[0.3em] text-cyan-500 uppercase font-bold">
+            Architect · Likith Naidu
+          </p>
         </div>
-        {session ? (
-          <div className="flex items-center gap-4">
-            <img src={session.user?.image || ""} className="w-8 h-8 rounded-full border border-white/10" />
-            <button onClick={() => signOut()} className="text-[10px] font-bold uppercase opacity-50 hover:opacity-100">Sign Out</button>
-          </div>
-        ) : (
-          <button onClick={() => signIn('google')} className="bg-white text-black px-4 py-1.5 rounded-full text-xs font-bold transition-transform hover:scale-105">Login</button>
-        )}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsTts(!isTts)}
+            className={`px-4 py-1.5 rounded-full text-[10px] font-bold border ${
+              isTts
+                ? "bg-cyan-500 text-black border-cyan-500"
+                : "border-white/10 text-zinc-500"
+            }`}
+          >
+            TTS {isTts ? "ON" : "OFF"}
+          </button>
+          <button
+            onClick={startSTT}
+            className={`px-4 py-1.5 rounded-full text-[10px] font-bold border ${
+              isListening
+                ? "bg-red-500 text-white animate-pulse border-red-500"
+                : "border-white/10 text-zinc-500"
+            }`}
+          >
+            VOICE
+          </button>
+        </div>
       </nav>
 
       {/* Chat Area */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-8 md:px-[20%] space-y-8 scroll-smooth">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto px-4 py-10 md:max-w-4xl md:mx-auto space-y-10"
+      >
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center space-y-4 pt-20">
-            <h2 className="text-4xl font-medium bg-gradient-to-r from-white via-cyan-400 to-blue-500 bg-clip-text text-transparent">Hello, Likith</h2>
-            <p className="text-zinc-500 text-sm">How can I assist your enterprise project today?</p>
+          <div className="text-center opacity-20 py-32">
+            <div className="w-14 h-14 border-2 border-dashed border-cyan-500 rounded-full animate-spin mb-6 mx-auto" />
+            <p className="text-xs tracking-[0.6em] uppercase font-bold">
+              Neural Sync Active
+            </p>
           </div>
         )}
-        
+
         {messages.map((m, i) => (
-          <div key={i} className={`flex gap-4 ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
-            <div className={`max-w-[90%] p-2 rounded-2xl ${m.role === 'user' ? 'bg-[#1e1e1e] border border-white/10 px-6 py-3' : 'w-full'}`}>
+          <div
+            key={i}
+            className={`flex ${
+              m.role === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`w-full max-w-[95%] ${
+                m.role === "user"
+                  ? "bg-[#161616] border border-white/5 rounded-2xl p-5"
+                  : "bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl"
+              }`}
+            >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-                className="prose prose-invert prose-sm max-w-none leading-relaxed"
+                className="prose prose-invert max-w-none"
                 components={{
-                  code({ node, inline, className, children, ...props }: any) {
-                    const match = /language-(\w+)/.exec(className || '');
+                  code({ inline, className, children }: any) {
+                    const match = /language-(\w+)/.exec(className || "");
                     return !inline && match ? (
-                      <div className="relative group my-4">
-                        <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => navigator.clipboard.writeText(String(children))} className="bg-white/10 hover:bg-white/20 p-1.5 rounded text-[10px]">Copy</button>
-                        </div>
-                        <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>
-                          {String(children).replace(/\n$/, '')}
+                      <div className="relative group my-6">
+                        <button
+                          onClick={() =>
+                            navigator.clipboard.writeText(String(children))
+                          }
+                          className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 bg-white/10 px-3 py-1 rounded text-[10px]"
+                        >
+                          Copy
+                        </button>
+                        <SyntaxHighlighter
+                          style={atomDark}
+                          language={match[1]}
+                        >
+                          {String(children).replace(/\n$/, "")}
                         </SyntaxHighlighter>
                       </div>
                     ) : (
-                      <code className="bg-white/10 px-1.5 py-0.5 rounded text-cyan-400 font-mono" {...props}>
+                      <code className="bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded">
                         {children}
                       </code>
                     );
                   },
-                  h1: ({children}) => <h1 className="text-2xl font-bold mt-6 mb-2 text-white">{children}</h1>,
-                  h2: ({children}) => <h2 className="text-xl font-bold mt-5 mb-2 text-cyan-400">{children}</h2>,
-                  li: ({children}) => <li className="mb-1 text-zinc-300 ml-4 list-disc">{children}</li>,
-                  p: ({children}) => <p className="mb-4 text-zinc-300 leading-7">{children}</p>,
                 }}
               >
                 {m.content}
@@ -101,25 +184,40 @@ export default function PrometheusGeminiUI() {
             </div>
           </div>
         ))}
-        {loading && <div className="text-cyan-500 animate-pulse text-xs font-mono px-[20%]">Prometheus is thinking...</div>}
+
+        {loading && (
+          <p className="text-cyan-500 text-[10px] tracking-[0.4em] uppercase animate-pulse">
+            Prometheus is structuring response...
+          </p>
+        )}
       </div>
 
-      {/* Input Field */}
-      <footer className="p-6 md:px-[20%]">
-        <div className="relative flex items-center bg-[#1e1e1e] border border-white/10 rounded-[32px] px-6 py-2 shadow-2xl focus-within:border-cyan-500/50 transition-all">
+      {/* Input */}
+      <footer className="p-6 bg-[#0a0a0a]">
+        <form
+          onSubmit={handleSend}
+          className="max-w-4xl mx-auto relative"
+        >
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask Prometheus anything..."
-            className="flex-1 bg-transparent py-4 outline-none text-base placeholder:text-zinc-600"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) handleSend(e);
+            }}
+            placeholder="Inject command for structured analysis..."
+            className="w-full bg-[#161616] border border-white/10 rounded-2xl px-8 py-5 outline-none focus:border-cyan-500/50"
           />
-          <button onClick={sendMessage} className="p-2 hover:bg-white/5 rounded-full transition-colors group">
-            <svg className="w-6 h-6 text-cyan-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+          <button
+            type="submit"
+            className="absolute right-3 top-3 bottom-3 bg-white text-black px-8 rounded-xl font-bold text-xs uppercase hover:bg-cyan-500"
+          >
+            Execute
           </button>
-        </div>
-        <p className="text-center text-[10px] text-zinc-600 mt-4">Prometheus can make mistakes. Verify important info. Built by Likith Naidu.</p>
+        </form>
+        <p className="text-center text-[8px] text-zinc-600 mt-6 tracking-[0.5em] uppercase font-bold">
+          Ready-made Notes Protocol v2.1
+        </p>
       </footer>
-    </div>
+    </main>
   );
 }
