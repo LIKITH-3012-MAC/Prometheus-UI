@@ -1,7 +1,9 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function PrometheusEnterprise() {
+  const { data: session } = useSession();
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [theme, setTheme] = useState("dark");
@@ -57,21 +59,45 @@ export default function PrometheusEnterprise() {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg)] transition-all duration-500">
       <nav className="p-6 border-b border-[var(--border)] flex justify-between items-center backdrop-blur-md sticky top-0 z-50">
-        <h1 className="text-2xl font-black tracking-tighter">PROMETHEUS <span className="text-cyan-500 text-xs uppercase">ENT-V1</span></h1>
-        <div className="flex gap-2">
-          <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="px-4 py-2 rounded-full border border-[var(--border)] text-[10px] font-bold uppercase">Mode: {theme}</button>
-          <button onClick={() => setIsTts(!isTts)} className="px-4 py-2 rounded-full border border-[var(--border)] text-[10px] font-bold uppercase">{isTts ? 'TTS ON' : 'TTS OFF'}</button>
-          <button onClick={startSTT} className={`px-4 py-2 rounded-full border text-[10px] font-bold uppercase ${isListening ? 'bg-red-500 text-white' : 'border-[var(--border)]'}`}>Voice</button>
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-black tracking-tighter">PROMETHEUS <span className="text-cyan-500 text-xs uppercase italic">ENT-V1</span></h1>
+          <p className="text-[8px] tracking-[0.3em] opacity-40 uppercase font-bold">Creator: Likith Naidu</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* User Profile / Login Section */}
+          {!session ? (
+            <button 
+              onClick={() => signIn('google')}
+              className="px-4 py-2 rounded-full bg-white text-black text-[10px] font-black uppercase hover:bg-cyan-500 transition-all"
+            >
+              Login with Google
+            </button>
+          ) : (
+            <div className="flex items-center gap-3 bg-white/5 p-1 pr-4 rounded-full border border-white/10">
+              <img src={session.user?.image || ""} alt="User" className="w-8 h-8 rounded-full border border-cyan-500" />
+              <button onClick={() => signOut()} className="text-[10px] font-black uppercase text-red-500 hover:text-white transition-all">Logout</button>
+            </div>
+          )}
+
+          <div className="h-8 w-[1px] bg-white/10 mx-2 hidden md:block"></div>
+
+          <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="px-4 py-2 rounded-full border border-[var(--border)] text-[10px] font-bold uppercase transition-all hover:bg-white hover:text-black">Mode: {theme}</button>
+          <button onClick={() => setIsTts(!isTts)} className={`px-4 py-2 rounded-full border border-[var(--border)] text-[10px] font-bold uppercase ${isTts ? 'text-cyan-400' : 'text-zinc-500'}`}>TTS</button>
+          <button onClick={startSTT} className={`px-4 py-2 rounded-full border text-[10px] font-bold uppercase ${isListening ? 'bg-red-500 text-white animate-pulse' : 'border-[var(--border)] text-zinc-500'}`}>Voice</button>
         </div>
       </nav>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-12 space-y-6">
         {messages.length === 0 && (
-          <div className="h-full flex items-center justify-center opacity-20 text-[10px] tracking-[2em] uppercase font-black text-center">Neural Link Online</div>
+          <div className="h-full flex flex-col items-center justify-center opacity-30">
+            <div className="w-12 h-12 border-t-2 border-cyan-500 rounded-full animate-spin mb-4"></div>
+            <p className="text-[10px] tracking-[1.5em] font-black uppercase">{session ? `Welcome Back, ${session.user?.name}` : 'Neural Link Active'}</p>
+          </div>
         )}
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in`}>
-            <div className={`p-6 rounded-2xl max-w-[85%] text-sm ${m.role === 'user' ? 'bg-cyan-500 text-black font-bold' : 'bg-[var(--surface)] border border-[var(--border)]'}`}>
+            <div className={`p-6 rounded-2xl max-w-[85%] text-sm ${m.role === 'user' ? 'bg-cyan-500 text-black font-bold shadow-[0_0_20px_rgba(0,243,255,0.3)]' : 'bg-[var(--surface)] border border-[var(--border)]'}`}>
               {m.content}
             </div>
           </div>
@@ -80,8 +106,14 @@ export default function PrometheusEnterprise() {
 
       <footer className="p-6 bg-black/20 border-t border-[var(--border)]">
         <div className="max-w-4xl mx-auto flex gap-4">
-          <input value={input} onKeyDown={(e) => e.key === 'Enter' && sendMessage()} onChange={(e) => setInput(e.target.value)} className="flex-1 bg-white/5 border border-[var(--border)] rounded-xl px-6 py-4 outline-none focus:border-cyan-500 text-white" placeholder="Ask Prometheus anything..." />
-          <button onClick={sendMessage} className="bg-white text-black px-10 rounded-xl font-black text-xs uppercase hover:bg-cyan-500">Execute</button>
+          <input 
+            value={input} 
+            onKeyDown={(e) => e.key === 'Enter' && sendMessage()} 
+            onChange={(e) => setInput(e.target.value)} 
+            className="flex-1 bg-white/5 border border-[var(--border)] rounded-xl px-6 py-4 outline-none focus:border-cyan-500 text-white" 
+            placeholder={session ? "Ask Prometheus anything..." : "Login for unlimited neural commands..."} 
+          />
+          <button onClick={sendMessage} className="bg-white text-black px-10 rounded-xl font-black text-xs uppercase hover:bg-cyan-500 transition-all">Execute</button>
         </div>
       </footer>
     </div>
