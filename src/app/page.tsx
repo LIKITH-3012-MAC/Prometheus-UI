@@ -1,46 +1,28 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-export default function PrometheusEnterprise() {
+export default function PrometheusGeminiUI() {
   const { data: session } = useSession();
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
-  const [theme, setTheme] = useState("dark");
-  const [isTts, setIsTts] = useState(true);
-  const [isListening, setIsListening] = useState(false);
+  const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
-  const speak = (text: string) => {
-    if (!isTts) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(u);
-  };
-
-  const startSTT = () => {
-    const SpeechRecognition = (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-    const recognition = new SpeechRecognition();
-    recognition.onstart = () => setIsListening(true);
-    recognition.onresult = (e: any) => setInput(e.results[0][0].transcript);
-    recognition.onend = () => setIsListening(false);
-    recognition.start();
-  };
-
   const sendMessage = async () => {
-    if (!input) return;
+    if (!input || loading) return;
     const userMsg = { role: "user", content: input };
     setMessages(p => [...p, userMsg]);
     setInput("");
+    setLoading(true);
     
     try {
       const res = await fetch('/api/chat', {
@@ -50,71 +32,93 @@ export default function PrometheusEnterprise() {
       });
       const data = await res.json();
       setMessages(p => [...p, { role: "assistant", content: data.content }]);
-      speak(data.content);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg)] transition-all duration-500">
-      <nav className="p-6 border-b border-[var(--border)] flex justify-between items-center backdrop-blur-md sticky top-0 z-50">
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-black tracking-tighter">PROMETHEUS <span className="text-cyan-500 text-xs uppercase italic">ENT-V1</span></h1>
-          <p className="text-[8px] tracking-[0.3em] opacity-40 uppercase font-bold">Creator: Likith Naidu</p>
+    <div className="min-h-screen flex flex-col bg-[#0e0e0e] text-[#e3e3e3] font-sans">
+      {/* Header */}
+      <nav className="p-5 border-b border-white/5 flex justify-between items-center backdrop-blur-xl sticky top-0 z-50">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-lg shadow-lg shadow-cyan-500/20"></div>
+          <h1 className="text-xl font-bold tracking-tight">PROMETHEUS <span className="text-xs text-cyan-500 font-mono opacity-50">PRO</span></h1>
         </div>
-
-        <div className="flex items-center gap-3">
-          {/* User Profile / Login Section */}
-          {!session ? (
-            <button 
-              onClick={() => signIn('google')}
-              className="px-4 py-2 rounded-full bg-white text-black text-[10px] font-black uppercase hover:bg-cyan-500 transition-all"
-            >
-              Login with Google
-            </button>
-          ) : (
-            <div className="flex items-center gap-3 bg-white/5 p-1 pr-4 rounded-full border border-white/10">
-              <img src={session.user?.image || ""} alt="User" className="w-8 h-8 rounded-full border border-cyan-500" />
-              <button onClick={() => signOut()} className="text-[10px] font-black uppercase text-red-500 hover:text-white transition-all">Logout</button>
-            </div>
-          )}
-
-          <div className="h-8 w-[1px] bg-white/10 mx-2 hidden md:block"></div>
-
-          <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="px-4 py-2 rounded-full border border-[var(--border)] text-[10px] font-bold uppercase transition-all hover:bg-white hover:text-black">Mode: {theme}</button>
-          <button onClick={() => setIsTts(!isTts)} className={`px-4 py-2 rounded-full border border-[var(--border)] text-[10px] font-bold uppercase ${isTts ? 'text-cyan-400' : 'text-zinc-500'}`}>TTS</button>
-          <button onClick={startSTT} className={`px-4 py-2 rounded-full border text-[10px] font-bold uppercase ${isListening ? 'bg-red-500 text-white animate-pulse' : 'border-[var(--border)] text-zinc-500'}`}>Voice</button>
-        </div>
+        {session ? (
+          <div className="flex items-center gap-4">
+            <img src={session.user?.image || ""} className="w-8 h-8 rounded-full border border-white/10" />
+            <button onClick={() => signOut()} className="text-[10px] font-bold uppercase opacity-50 hover:opacity-100">Sign Out</button>
+          </div>
+        ) : (
+          <button onClick={() => signIn('google')} className="bg-white text-black px-4 py-1.5 rounded-full text-xs font-bold transition-transform hover:scale-105">Login</button>
+        )}
       </nav>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-12 space-y-6">
+      {/* Chat Area */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-8 md:px-[20%] space-y-8 scroll-smooth">
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center opacity-30">
-            <div className="w-12 h-12 border-t-2 border-cyan-500 rounded-full animate-spin mb-4"></div>
-            <p className="text-[10px] tracking-[1.5em] font-black uppercase">{session ? `Welcome Back, ${session.user?.name}` : 'Neural Link Active'}</p>
+          <div className="h-full flex flex-col items-center justify-center space-y-4 pt-20">
+            <h2 className="text-4xl font-medium bg-gradient-to-r from-white via-cyan-400 to-blue-500 bg-clip-text text-transparent">Hello, Likith</h2>
+            <p className="text-zinc-500 text-sm">How can I assist your enterprise project today?</p>
           </div>
         )}
+        
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in`}>
-            <div className={`p-6 rounded-2xl max-w-[85%] text-sm ${m.role === 'user' ? 'bg-cyan-500 text-black font-bold shadow-[0_0_20px_rgba(0,243,255,0.3)]' : 'bg-[var(--surface)] border border-[var(--border)]'}`}>
-              {m.content}
+          <div key={i} className={`flex gap-4 ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
+            <div className={`max-w-[90%] p-2 rounded-2xl ${m.role === 'user' ? 'bg-[#1e1e1e] border border-white/10 px-6 py-3' : 'w-full'}`}>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                className="prose prose-invert prose-sm max-w-none leading-relaxed"
+                components={{
+                  code({ node, inline, className, children, ...props }: any) {
+                    const match = /language-(\w+)/.exec(className || '');
+                    return !inline && match ? (
+                      <div className="relative group my-4">
+                        <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => navigator.clipboard.writeText(String(children))} className="bg-white/10 hover:bg-white/20 p-1.5 rounded text-[10px]">Copy</button>
+                        </div>
+                        <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>
+                          {String(children).replace(/\n$/, '')}
+                        </SyntaxHighlighter>
+                      </div>
+                    ) : (
+                      <code className="bg-white/10 px-1.5 py-0.5 rounded text-cyan-400 font-mono" {...props}>
+                        {children}
+                      </code>
+                    );
+                  },
+                  h1: ({children}) => <h1 className="text-2xl font-bold mt-6 mb-2 text-white">{children}</h1>,
+                  h2: ({children}) => <h2 className="text-xl font-bold mt-5 mb-2 text-cyan-400">{children}</h2>,
+                  li: ({children}) => <li className="mb-1 text-zinc-300 ml-4 list-disc">{children}</li>,
+                  p: ({children}) => <p className="mb-4 text-zinc-300 leading-7">{children}</p>,
+                }}
+              >
+                {m.content}
+              </ReactMarkdown>
             </div>
           </div>
         ))}
+        {loading && <div className="text-cyan-500 animate-pulse text-xs font-mono px-[20%]">Prometheus is thinking...</div>}
       </div>
 
-      <footer className="p-6 bg-black/20 border-t border-[var(--border)]">
-        <div className="max-w-4xl mx-auto flex gap-4">
-          <input 
-            value={input} 
-            onKeyDown={(e) => e.key === 'Enter' && sendMessage()} 
-            onChange={(e) => setInput(e.target.value)} 
-            className="flex-1 bg-white/5 border border-[var(--border)] rounded-xl px-6 py-4 outline-none focus:border-cyan-500 text-white" 
-            placeholder={session ? "Ask Prometheus anything..." : "Login for unlimited neural commands..."} 
+      {/* Input Field */}
+      <footer className="p-6 md:px-[20%]">
+        <div className="relative flex items-center bg-[#1e1e1e] border border-white/10 rounded-[32px] px-6 py-2 shadow-2xl focus-within:border-cyan-500/50 transition-all">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+            placeholder="Ask Prometheus anything..."
+            className="flex-1 bg-transparent py-4 outline-none text-base placeholder:text-zinc-600"
           />
-          <button onClick={sendMessage} className="bg-white text-black px-10 rounded-xl font-black text-xs uppercase hover:bg-cyan-500 transition-all">Execute</button>
+          <button onClick={sendMessage} className="p-2 hover:bg-white/5 rounded-full transition-colors group">
+            <svg className="w-6 h-6 text-cyan-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+          </button>
         </div>
+        <p className="text-center text-[10px] text-zinc-600 mt-4">Prometheus can make mistakes. Verify important info. Built by Likith Naidu.</p>
       </footer>
     </div>
   );
