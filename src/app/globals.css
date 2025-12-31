@@ -2,55 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* DARK */
 :root {
-  --cyan-glow: #00f6ff;
-  --gold-accent: #ffd700;
-  --deep-void: #010409;
-  --neural-purple: #a855f7;
+  --bg: #05070c;
+  --surface: rgba(255,255,255,0.05);
+  --text: #ffffff;
+  --primary: #00f6ff;
+  --border: rgba(255,255,255,0.12);
 }
 
-body {
-  background: radial-gradient(circle at 50% 50%, #0a0a2e 0%, #010409 100%);
-  color: white;
-  font-family: 'Inter', system-ui, sans-serif;
-  overflow: hidden;
-  height: 100vh;
+/* LIGHT */
+.light {
+  --bg: #f4f7fb;
+  --surface: rgba(0,0,0,0.05);
+  --text: #05070c;
+  --primary: #0066ff;
+  --border: rgba(0,0,0,0.12);
 }
 
-/* 💎 LUXURY GLASS */
-.billion-glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(255, 256, 255, 0.08);
-  box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  overscroll-behavior: none;
 }
 
-/* ✨ NEURAL TEXT */
-.text-billionaire {
-  background: linear-gradient(135deg, #fff 0%, #00f6ff 50%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 15px rgba(0, 246, 255, 0.4));
-}
+.bg-bg { background: var(--bg); }
+.bg-surface { background: var(--surface); }
+.text-text { color: var(--text); }
+.bg-primary { background: var(--primary); }
+.text-primary { color: var(--primary); }
+.border-border { border-color: var(--border); }
 
-/* 🌀 LIVING GRADIENT FOR CHAT */
-.chat-luxury-ai {
-  background: linear-gradient(135deg, rgba(0,246,255,0.05) 0%, rgba(168,85,247,0.05) 100%);
-  border-left: 2px solid var(--cyan-glow);
-  box-shadow: inset 0 0 20px rgba(0,246,255,0.05);
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 20px;
 }
-
-.chat-luxury-user {
-  background: linear-gradient(135deg, #00f6ff 0%, #a855f7 100%);
-  color: #000;
-  font-weight: 800;
-  box-shadow: 0 10px 40px rgba(0, 246, 255, 0.3);
-}
-
-/* ⚡️ MOTION KEYFRAMES */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-.floating { animation: float 6s ease-in-out infinite; }
