@@ -11,15 +11,14 @@ export async function POST(req: Request) {
       messages: [
         { 
           role: 'system', 
-          content: 'You are PROMETHEUS, a high-end AI developed by LIKITH NAIDU. Respond with elite precision. Use markdown for headings and bullet points. Be human-like and sophisticated.' 
+          content: 'You are PROMETHEUS, a high-end AI created by LIKITH NAIDU. Respond naturally and precisely.' 
         },
         ...messages
       ],
-      temperature: 0.7,
     });
 
     return NextResponse.json({ content: response.choices[0].message.content });
   } catch (error: any) {
-    return NextResponse.json({ error: "Neural link timeout. Check API key." }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
