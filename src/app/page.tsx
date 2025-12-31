@@ -10,46 +10,54 @@ export default function PrometheusAtoZ() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [scrollPct, setScrollPct] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // --- AUTO SCROLL LOGIC ---
+  /* ---------- SCROLL ENGINE ---------- */
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    const pct = (scrollTop / (scrollHeight - clientHeight)) * 100;
+    setScrollPct(Math.min(100, Math.max(0, pct)));
+  };
+
   const scrollToBottom = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "smooth"
-      });
-    }
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
 
-  // --- SPEECH ENGINE (TTS) ---
+  /* ---------- SPEECH ---------- */
   const speak = (text: string) => {
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace(/[#*🔹📌⚠️•]/g, ''));
+    const u = new SpeechSynthesisUtterance(text.replace(/[#*🔹📌⚠️•]/g, ""));
     u.rate = 1.1;
     window.speechSynthesis.speak(u);
   };
 
-  // --- SPEECH RECOGNITION (STT) ---
   const startSTT = () => {
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    const SpeechRecognition =
+      (window as any).webkitSpeechRecognition ||
+      (window as any).SpeechRecognition;
     if (!SpeechRecognition) return;
     const recognition = new SpeechRecognition();
     recognition.onstart = () => setIsListening(true);
-    recognition.onresult = (e: any) => setInput(e.results[0][0].transcript);
+    recognition.onresult = (e: any) =>
+      setInput(e.results[0][0].transcript);
     recognition.onend = () => setIsListening(false);
     recognition.start();
   };
 
-  // --- CORE CHAT LOGIC ---
+  /* ---------- CHAT ---------- */
   const handleSend = async () => {
     if (!input.trim() || loading) return;
     const userMsg = { role: "user", content: input };
-    setMessages(prev => [...prev, userMsg]);
+    setMessages((p) => [...p, userMsg]);
     setInput("");
     setLoading(true);
 
@@ -60,63 +68,100 @@ export default function PrometheusAtoZ() {
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
       const data = await res.json();
-      const assistantMsg = { role: "assistant", content: data.content };
-      setMessages(prev => [...prev, assistantMsg]);
+      setMessages((p) => [...p, { role: "assistant", content: data.content }]);
       speak(data.content);
-    } catch (err) {
-      setMessages(prev => [...prev, { role: "assistant", content: "Neural Core Offline. Please check Link." }]);
+    } catch {
+      setMessages((p) => [
+        ...p,
+        { role: "assistant", content: "Neural Core Offline." },
+      ]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="fixed inset-0 bg-[#010409] flex flex-col overflow-hidden font-sans">
-      {/* 🚀 ELITE HUD HEADER */}
-      <header className="shrink-0 h-24 flex justify-between items-center px-8 md:px-12 z-50 border-b border-white/5 backdrop-blur-3xl bg-black/20">
-        <div className="flex flex-col">
-          <h1 className="text-3xl font-black tracking-tighter text-billionaire uppercase italic">Prometheus</h1>
-          <p className="text-[10px] tracking-[0.5em] font-bold text-cyan-400 opacity-60">SOVEREIGN INTELLIGENCE • LIKITH NAIDU</p>
+    <main className="relative min-h-screen bg-[#05070c] text-white overflow-hidden">
+      {/* 🌌 PARALLAX BACKGROUND */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(0,255,255,0.08),transparent_40%),radial-gradient(circle_at_70%_80%,rgba(0,120,255,0.06),transparent_45%)]" />
+
+      {/* 📊 SCROLL HUD */}
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-50 h-40 w-1 bg-white/10 rounded-full">
+        <div
+          className="bg-cyan-400 w-full rounded-full transition-all duration-200"
+          style={{ height: `${scrollPct}%` }}
+        />
+      </div>
+
+      {/* 🧠 HEADER */}
+      <header className="relative z-40 h-24 flex justify-between items-center px-10 border-b border-white/5 backdrop-blur-3xl bg-black/40">
+        <div>
+          <h1 className="text-3xl font-black italic tracking-tight uppercase">
+            Prometheus
+          </h1>
+          <p className="text-[10px] tracking-[0.5em] text-cyan-400 opacity-70">
+            SOVEREIGN INTELLIGENCE • LIKITH NAIDU
+          </p>
         </div>
         <div className="flex gap-4">
-          <button onClick={startSTT} className={`glass px-6 py-2 text-[10px] font-black tracking-widest transition-all ${isListening ? 'text-red-500 border-red-500 animate-pulse' : 'text-cyan-400 border-cyan-500/20'}`}>
-            {isListening ? 'LISTENING...' : 'VOICE COMMAND'}
+          <button
+            onClick={startSTT}
+            className={`px-6 py-2 rounded-full text-[10px] font-black tracking-widest border ${
+              isListening
+                ? "text-red-400 border-red-500 animate-pulse"
+                : "text-cyan-400 border-cyan-400/30"
+            }`}
+          >
+            {isListening ? "LISTENING..." : "VOICE"}
           </button>
-          <div className="glass px-4 py-2 text-[10px] font-black text-zinc-500 border-white/5">V.70B</div>
+          <div className="px-4 py-2 text-[10px] rounded-full border border-white/10 text-zinc-400">
+            V.70B
+          </div>
         </div>
       </header>
 
-      {/* 🌌 NEURAL STREAM (AUTO-SCROLLING) */}
-      <div 
-        ref={scrollRef} 
-        className="flex-1 overflow-y-auto px-6 md:px-[25%] py-12 space-y-12 scroll-smooth custom-scrollbar scrollbar-hide"
+      {/* 💬 CHAT STREAM */}
+      <section
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="relative z-30 h-[calc(100vh-240px)] overflow-y-auto px-6 md:px-[22%] py-16 space-y-12 scroll-smooth"
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
-        {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center space-y-6 opacity-30 mt-20">
-             <div className="w-16 h-16 rounded-full border border-cyan-500/30 flex items-center justify-center shadow-2xl">
-                <div className="w-3 h-3 bg-cyan-500 rounded-full animate-ping"></div>
-             </div>
-             <p className="text-[10px] tracking-[2em] font-black text-white uppercase text-center">Neural handshaking ready</p>
-          </div>
-        )}
-        
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-5 duration-500`}>
-            <div className={`p-8 rounded-[35px] max-w-[95%] shadow-2xl transition-all ${m.role === 'user' ? 'chat-luxury-user' : 'billion-glass chat-luxury-ai text-zinc-100 border-white/10'}`}>
-              <ReactMarkdown 
-                remarkPlugins={[remarkGfm]} 
-                className="prose prose-invert max-w-none text-base md:text-lg leading-relaxed font-medium"
+          <div
+            key={i}
+            className={`flex ${
+              m.role === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`max-w-[90%] p-8 rounded-[36px] shadow-2xl ${
+                m.role === "user"
+                  ? "bg-gradient-to-br from-cyan-500 to-blue-600 text-black font-bold"
+                  : "bg-white/5 backdrop-blur-2xl border border-white/10"
+              }`}
+            >
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                className="prose prose-invert max-w-none"
                 components={{
-                  code({ node, inline, className, children, ...props }: any) {
-                    const match = /language-(\w+)/.exec(className || '');
+                  code({ inline, className, children }: any) {
+                    const match = /language-(\w+)/.exec(className || "");
                     return !inline && match ? (
-                      <div className="my-8 rounded-2xl overflow-hidden border border-white/5 shadow-2xl">
-                        <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>{String(children).replace(/\n$/, '')}</SyntaxHighlighter>
+                      <div className="my-6 rounded-2xl overflow-hidden">
+                        <SyntaxHighlighter
+                          style={atomDark}
+                          language={match[1]}
+                        >
+                          {String(children)}
+                        </SyntaxHighlighter>
                       </div>
                     ) : (
-                      <code className="bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded font-mono text-sm" {...props}>{children}</code>
+                      <code className="bg-cyan-500/20 px-2 py-1 rounded">
+                        {children}
+                      </code>
                     );
-                  }
+                  },
                 }}
               >
                 {m.content}
@@ -124,28 +169,29 @@ export default function PrometheusAtoZ() {
             </div>
           </div>
         ))}
-        {loading && <div className="text-cyan-400 animate-pulse text-[10px] font-black tracking-[0.5em] uppercase px-8 italic">Synchronizing Neural Core...</div>}
-      </div>
+        {loading && (
+          <p className="text-cyan-400 animate-pulse text-xs tracking-widest">
+            SYNCHRONIZING NEURAL CORE…
+          </p>
+        )}
+      </section>
 
-      {/* 💎 FIXED LUXURY SEARCH BAR (BOTTOM CENTER) */}
-      <footer className="shrink-0 h-44 flex items-center justify-center px-6 z-50 pointer-events-none bg-gradient-to-t from-[#010409] via-[#010409] to-transparent">
-        <div className="w-full max-w-4xl pointer-events-auto flex flex-col items-center">
-          <div className="w-full billion-glass flex items-center p-3 rounded-[40px] border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] focus-within:border-cyan-500/50 transition-all duration-700 group bg-black/60 backdrop-blur-3xl">
-            <input 
-              value={input} 
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()} 
-              onChange={(e) => setInput(e.target.value)} 
-              className="flex-1 bg-transparent px-10 py-6 outline-none text-white text-xl font-bold placeholder:text-zinc-800 caret-cyan-400" 
-              placeholder="Inject sovereign instruction..." 
-            />
-            <button 
-              onClick={handleSend} 
-              className="bg-white text-black px-12 py-5 rounded-[30px] font-black text-[10px] uppercase tracking-widest hover:bg-cyan-400 hover:scale-105 active:scale-95 transition-all shadow-2xl mr-2"
-            >
-              Execute
-            </button>
-          </div>
-          <p className="text-[7px] text-zinc-800 tracking-[2em] font-black uppercase mt-6 opacity-50">Sovereign Encryption Node Active</p>
+      {/* ⌨️ INPUT BAR */}
+      <footer className="relative z-40 h-36 flex items-center justify-center bg-gradient-to-t from-black via-black/80 to-transparent">
+        <div className="w-full max-w-4xl flex gap-4 px-6">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            className="flex-1 bg-black/60 border border-white/10 backdrop-blur-2xl px-8 py-6 rounded-full text-xl outline-none caret-cyan-400"
+            placeholder="Inject sovereign instruction…"
+          />
+          <button
+            onClick={handleSend}
+            className="bg-white text-black px-12 rounded-full font-black hover:bg-cyan-400 transition-all"
+          >
+            EXECUTE
+          </button>
         </div>
       </footer>
     </main>
