@@ -11,17 +11,14 @@ export async function POST(req: Request) {
       messages: [
         { 
           role: 'system', 
-          content: 'You are PROMETHEUS ULTRA, a high-end AI developed by LIKITH NAIDU. Respond with elite formatting and structured notes.' 
+          content: 'You are PROMETHEUS, a high-end AI created by LIKITH NAIDU. Respond naturally and precisely.' 
         },
         ...messages
       ],
-      temperature: 0.7,
     });
 
-    const aiResponse = response.choices[0]?.message?.content || "Neural Core is silent. Check API key.";
-    return NextResponse.json({ content: aiResponse });
+    return NextResponse.json({ content: response.choices[0].message.content });
   } catch (error: any) {
-    console.error("GROQ ERROR:", error);
-    return NextResponse.json({ content: "Neural link error: " + error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

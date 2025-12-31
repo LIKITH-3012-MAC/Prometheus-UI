@@ -1,13 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Send, Mic } from "lucide-react";
-import Starfield from "./components/Starfield";
 
-export default function PrometheusUltra() {
+export default function PrometheusYesterday() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,28 +11,10 @@ export default function PrometheusUltra() {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
-  const typeMessage = (text: string) => {
-    let i = 0;
-    setMessages(prev => [...prev, { role: "assistant", content: "" }]);
-    const interval = setInterval(() => {
-      setMessages(prev => {
-        const updated = [...prev];
-        const lastIndex = updated.length - 1;
-        if (updated[lastIndex]) {
-          updated[lastIndex] = { ...updated[lastIndex], content: text.slice(0, i + 1) };
-        }
-        return updated;
-      });
-      i++;
-      if (i >= text.length) clearInterval(interval);
-    }, 15);
-  };
-
   const handleSend = async () => {
     if (!input.trim() || loading) return;
     const userMsg = { role: "user", content: input };
-    setMessages(p => [...p, userMsg]);
-    const currentInput = input;
+    setMessages(prev => [...prev, userMsg]);
     setInput("");
     setLoading(true);
 
@@ -49,43 +25,42 @@ export default function PrometheusUltra() {
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
       const data = await res.json();
-      typeMessage(data.content);
+      setMessages(prev => [...prev, { role: "assistant", content: data.content }]);
     } catch (err) {
-      console.error(err);
-      setMessages(p => [...p, { role: "assistant", content: "Sync failed. Check connection." }]);
+      setMessages(prev => [...prev, { role: "assistant", content: "Error: Neural Link Failed." }]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="h-screen w-screen relative overflow-hidden flex flex-col bg-[#020617]">
-      <Starfield />
-      <header className="p-6 flex justify-between items-center z-10 backdrop-blur-md border-b border-white/5">
-        <h1 className="text-3xl font-black text-gradient uppercase">Prometheus ULTRA</h1>
-        <div className="glass px-4 py-2 text-[10px] font-bold text-cyan-400 animate-pulse uppercase">Neural Link Online</div>
+    <main className="h-screen bg-black text-white flex flex-col p-4 md:p-10 font-sans">
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold text-cyan-500">PROMETHEUS RESTORED</h1>
+        <p className="text-xs opacity-50 font-mono">Architecture: Likith Naidu</p>
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-[20%] py-10 space-y-8 z-10 scrollbar-hide">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-6 mb-20 px-2">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-3`}>
-            <div className={`p-6 rounded-[24px] max-w-[95%] ${m.role === 'user' ? 'chat-user glow-purple text-white shadow-xl' : 'glass chat-ai text-zinc-100'}`}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] p-4 rounded-xl ${m.role === 'user' ? 'bg-zinc-800' : 'bg-cyan-900/20 border border-cyan-500/20'}`}>
+              <p className="text-sm leading-relaxed">{m.content}</p>
             </div>
           </div>
         ))}
+        {loading && <div className="text-cyan-500 animate-pulse text-xs">Thinking...</div>}
       </div>
 
-      <footer className="p-8 md:px-[20%] z-20">
-        <div className="glass-strong flex items-center p-2 rounded-[32px] hover-glow transition-all duration-500">
+      <footer className="fixed bottom-10 left-0 right-0 px-4 md:px-10">
+        <div className="max-w-4xl mx-auto flex gap-4">
           <input 
-            value={input} 
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSend()}
-            placeholder="Issue an ULTRA command..." 
-            className="flex-1 bg-transparent px-8 py-4 outline-none text-white text-lg placeholder:text-white/20"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            placeholder="Type your command..."
+            className="flex-1 bg-zinc-900 border border-white/10 rounded-lg px-6 py-4 outline-none focus:border-cyan-500 transition-all"
           />
-          <button onClick={handleSend} className="btn btn-neon text-black text-xs uppercase font-black px-8 py-3 rounded-full mr-2 transition-all hover:scale-105 active:scale-95">Execute</button>
+          <button onClick={handleSend} className="bg-white text-black px-8 py-4 rounded-lg font-bold hover:bg-cyan-500 transition-all">Send</button>
         </div>
       </footer>
     </main>
