@@ -2,81 +2,123 @@
 @tailwind components;
 @tailwind utilities;
 
+/* --- Root Neon Variables --- */
 :root {
-  --bg-main: #010409;
-  --bg-surface: rgba(20, 22, 30, 0.65);
-  --border-glass: rgba(255, 255, 255, 0.1);
-  --text-main: #e6e6ff;
-  --text-muted: #9aa4b2;
-  --accent-cyan: #00f6ff;
-  --accent-blue: #4da3ff;
-  --shadow-heavy: 0 40px 120px rgba(0, 0, 0, 0.85);
+  --bg-dark: #050505;
+  --bg-light: #f0f0f0;
+  --neon-cyan: #00f3ff;
+  --neon-pink: #ff00ff;
+  --neon-purple: #9400ff;
+  --text-dark: #ffffff;
+  --text-light: #000000;
+  --border-neon: rgba(0, 243, 255, 0.5);
 }
 
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system;
-  overflow: hidden;
-  background-color: var(--bg-main);
-  color: var(--text-main);
+/* --- Body & Base --- */
+body {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+  font-family: 'Orbitron', sans-serif;
+  overflow-x: hidden;
 }
 
-.glass {
-  background: var(--bg-surface);
-  backdrop-filter: blur(28px) saturate(160%);
-  border: 1px solid var(--border-glass);
-  box-shadow: var(--shadow-heavy);
-  border-radius: 2rem;
-  transition: all 0.3s ease-in-out;
+/* --- Scrollbar Neon --- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--neon-cyan);
+  border-radius: 10px;
+  box-shadow: 0 0 10px var(--neon-cyan);
 }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid var(--border-glass);
+/* --- Glassy Chat Panel --- */
+.chat-container {
+  backdrop-filter: blur(15px) saturate(180%);
+  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  background-color: rgba(0,0,0,0.3);
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 1rem;
+  overflow-y: auto;
 }
 
-footer {
-  display: flex;
-  align-items: center;
-  padding: 1rem 2rem;
-  gap: 1rem;
-  border-top: 1px solid var(--border-glass);
-  backdrop-filter: blur(24px);
+/* --- Chat Bubbles --- */
+.chat-bubble {
+  border-radius: 1rem;
+  padding: 0.8rem 1rem;
+  max-width: 75%;
+  word-break: break-word;
+  box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-pink);
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+.chat-bubble.user {
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  color: #fff;
+  margin-left: auto;
+}
+.chat-bubble.ai {
+  background: linear-gradient(90deg, #ff00ff, #9400ff);
+  color: #fff;
+  margin-right: auto;
 }
 
-input {
-  flex: 1;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-glass);
-  border-radius: 999px;
-  padding: 1rem 1.5rem;
-  color: var(--text-main);
+/* --- Copy button --- */
+.copy-btn {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: #fff;
+  opacity: 0.6;
+}
+.copy-btn:hover { opacity: 1; }
+
+/* --- Input Box & Buttons --- */
+input, textarea {
+  border: 2px solid var(--neon-cyan);
+  border-radius: 0.75rem;
+  background: rgba(0,0,0,0.3);
+  color: var(--text-dark);
+  padding: 0.6rem 1rem;
+  transition: all 0.3s ease;
+}
+input:focus, textarea:focus {
   outline: none;
-  font-weight: 600;
+  box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-pink);
+  border-color: var(--neon-pink);
 }
-
-input::placeholder { color: var(--text-muted); }
-
 button {
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-  color: #000;
+  font-family: 'Orbitron', sans-serif;
   font-weight: bold;
-  padding: 1rem 1.5rem;
-  border-radius: 999px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.25s ease-in-out;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: none;
+  text-shadow: 0 0 5px #fff;
+}
+button:hover {
+  transform: scale(1.05);
+  text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-pink);
 }
 
-button:hover { transform: scale(1.05); filter: brightness(1.2); }
+/* --- AI Typing Animation --- */
+.ai-text span {
+  display: inline-block;
+  opacity: 0;
+  animation: fadeInLetter 0.05s forwards;
+}
+@keyframes fadeInLetter {
+  to { opacity: 1; }
+}
 
-@media (max-width: 768px) {
-  header h1 { font-size: 1.5rem; }
-  input { padding: 0.75rem 1rem; }
-  button { padding: 0.75rem 1rem; font-size: 0.875rem; }
+/* --- Responsive --- */
+@media (max-width:768px) {
+  .chat-container { max-height: 50vh; }
+  input { font-size: 0.9rem; }
+  button { font-size: 0.85rem; padding: 0.4rem 0.8rem; }
 }
