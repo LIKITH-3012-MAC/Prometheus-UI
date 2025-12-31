@@ -1,23 +1,20 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import UltraInput, { useSpeech } from "./components/UltraInput";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Send, Mic } from "lucide-react";
+import Starfield from "./components/Starfield";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
-
-export default function PrometheusUltraPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
+export default function PrometheusUltra() {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current)
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
   const typeMessage = (text: string) => {
@@ -26,69 +23,71 @@ export default function PrometheusUltraPage() {
     const interval = setInterval(() => {
       setMessages(prev => {
         const updated = [...prev];
-        updated[updated.length - 1].content = text.slice(0, i + 1);
+        const lastIndex = updated.length - 1;
+        if (updated[lastIndex]) {
+          updated[lastIndex] = { ...updated[lastIndex], content: text.slice(0, i + 1) };
+        }
         return updated;
       });
       i++;
       if (i >= text.length) clearInterval(interval);
-    }, 10);
+    }, 15);
   };
 
-  const handleSend = (text: string) => {
-    if (!text.trim()) return;
-    setMessages(prev => [...prev, { role: "user", content: text }]);
-    // AI echo + TTS
-    typeMessage(`Echo: ${text}`);
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+    const userMsg = { role: "user", content: input };
+    setMessages(p => [...p, userMsg]);
+    const currentInput = input;
+    setInput("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [...messages, userMsg] }),
+      });
+      const data = await res.json();
+      typeMessage(data.content);
+    } catch (err) {
+      console.error(err);
+      setMessages(p => [...p, { role: "assistant", content: "Sync failed. Check connection." }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <main className="h-screen w-screen bg-gradient-to-br from-[#020617] to-[#0a0a2e] relative flex flex-col">
-      {/* Header */}
-      <header className="text-center py-6">
-        <h1 className="text-4xl font-black text-vibgyor uppercase">PROMETHEUS ULTRA</h1>
-        <p className="text-xs tracking-widest text-cyan-400 mt-1">NEURAL LINK • LIKITH NAIDU</p>
+    <main className="h-screen w-screen relative overflow-hidden flex flex-col bg-[#020617]">
+      <Starfield />
+      <header className="p-6 flex justify-between items-center z-10 backdrop-blur-md border-b border-white/5">
+        <h1 className="text-3xl font-black text-gradient uppercase">Prometheus ULTRA</h1>
+        <div className="glass px-4 py-2 text-[10px] font-bold text-cyan-400 animate-pulse uppercase">Neural Link Online</div>
       </header>
 
-      {/* Chat area */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto px-6 space-y-4 pb-32"
-      >
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-[20%] py-10 space-y-8 z-10 scrollbar-hide">
         {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`p-4 rounded-2xl max-w-[80%] 
-                ${m.role === "user"
-                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-                  : "bg-gradient-to-r from-cyan-500 to-indigo-500 text-white"}`}
-            >
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  code({ node, inline, className, children, ...props }: any) {
-                    const match = /language-(\w+)/.exec(className || '');
-                    return !inline && match ? (
-                      <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>
-                        {String(children).replace(/\n$/, '')}
-                      </SyntaxHighlighter>
-                    ) : (
-                      <code className="bg-white/10 px-1 py-0.5 rounded font-mono" {...props}>{children}</code>
-                    );
-                  }
-                }}
-              >
-                {m.content}
-              </ReactMarkdown>
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-3`}>
+            <div className={`p-6 rounded-[24px] max-w-[95%] ${m.role === 'user' ? 'chat-user glow-purple text-white shadow-xl' : 'glass chat-ai text-zinc-100'}`}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Bottom-center ULTRA Input */}
-      <UltraInput onSend={handleSend} />
+      <footer className="p-8 md:px-[20%] z-20">
+        <div className="glass-strong flex items-center p-2 rounded-[32px] hover-glow transition-all duration-500">
+          <input 
+            value={input} 
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleSend()}
+            placeholder="Issue an ULTRA command..." 
+            className="flex-1 bg-transparent px-8 py-4 outline-none text-white text-lg placeholder:text-white/20"
+          />
+          <button onClick={handleSend} className="btn btn-neon text-black text-xs uppercase font-black px-8 py-3 rounded-full mr-2 transition-all hover:scale-105 active:scale-95">Execute</button>
+        </div>
+      </footer>
     </main>
   );
 }
