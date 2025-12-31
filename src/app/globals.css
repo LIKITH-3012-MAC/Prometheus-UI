@@ -2,44 +2,180 @@
 @tailwind components;
 @tailwind utilities;
 
-/* THEME TOKENS */
+/* ===============================
+   🎬 CINEMATIC AI THEME TOKENS
+================================ */
 :root {
-  --bg-dark: #050505;
-  --bg-light: #f5f7fa;
-  --text-dark: #f8f9fa;
-  --text-light: #050505;
-  --accent: #00f6ff;
+  --bg-main: #05070b;
+  --bg-glass: rgba(15, 18, 25, 0.65);
+  --border-glass: rgba(255, 255, 255, 0.08);
+
+  --text-main: #e8ebf0;
+  --text-muted: #9aa4b2;
+
+  --accent-cyan: #00f6ff;
+  --accent-blue: #4da3ff;
+  --accent-violet: #7c7cff;
+
+  --shadow-heavy: 0 40px 120px rgba(0, 0, 0, 0.85);
 }
 
+/* ===============================
+   🌌 GLOBAL RESET
+================================ */
 html,
 body {
   height: 100%;
   margin: 0;
-  font-family: ui-sans-serif, system-ui;
+  padding: 0;
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-family: ui-sans-serif, system-ui, -apple-system;
+  overflow: hidden;
 }
 
-body.dark {
-  background: var(--bg-dark);
-  color: var(--text-dark);
+/* ===============================
+   🤖 CINEMATIC BACKGROUND
+================================ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(
+      circle at 50% 20%,
+      rgba(0, 246, 255, 0.12),
+      transparent 60%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.4),
+      rgba(0, 0, 0, 0.85)
+    ),
+    url("https://www.motionelements.com/stock-image-33739443-advanced-ai-robot-in-high-tech-data-center?srsltid=AfmBOoq0MbMFWoxcGnNkI1QKEHE79TztBBS-h8IbNpmbav8KIG5QCGKs");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: saturate(1.1) contrast(1.15);
+  z-index: -2;
 }
 
-body.light {
-  background: var(--bg-light);
-  color: var(--text-light);
+/* ===============================
+   🧊 GLASS PANEL BASE
+================================ */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-heavy);
 }
 
-/* MESSAGE ANIMATION */
+/* ===============================
+   🧠 HEADER (CINEMATIC HUD)
+================================ */
+header {
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 7, 11, 0.85),
+    rgba(5, 7, 11, 0.4)
+  );
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+/* ===============================
+   💬 CHAT CONTAINERS
+================================ */
+.chat-user {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 246, 255, 0.15),
+    rgba(0, 246, 255, 0.05)
+  );
+  border: 1px solid rgba(0, 246, 255, 0.25);
+}
+
+.chat-ai {
+  background: linear-gradient(
+    135deg,
+    rgba(124, 124, 255, 0.15),
+    rgba(124, 124, 255, 0.05)
+  );
+  border: 1px solid rgba(124, 124, 255, 0.25);
+}
+
+/* ===============================
+   🧠 MESSAGE ANIMATION
+================================ */
 .message {
-  animation: fadeIn 0.35s ease-out;
+  animation: messageIn 0.35s ease-out both;
 }
 
-@keyframes fadeIn {
+@keyframes messageIn {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===============================
+   🧾 MARKDOWN CONTENT
+================================ */
+.prose {
+  color: var(--text-main);
+}
+
+.prose strong {
+  color: var(--accent-cyan);
+}
+
+.prose code {
+  background: rgba(0, 246, 255, 0.15);
+  color: var(--accent-cyan);
+  padding: 0.2em 0.45em;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* ===============================
+   📥 INPUT BAR (BOTTOM)
+================================ */
+footer {
+  background: linear-gradient(
+    to top,
+    rgba(5, 7, 11, 0.95),
+    rgba(5, 7, 11, 0.3),
+    transparent
+  );
+  backdrop-filter: blur(20px);
+}
+
+input {
+  color: var(--text-main);
+}
+
+input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ===============================
+   📱 RESPONSIVE TUNING
+================================ */
+@media (max-width: 768px) {
+  body::before {
+    filter: brightness(0.85) contrast(1.1);
+  }
+
+  header h1 {
+    font-size: 1rem;
+  }
+
+  .glass {
+    backdrop-filter: blur(16px);
   }
 }
