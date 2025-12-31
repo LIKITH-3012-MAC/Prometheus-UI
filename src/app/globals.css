@@ -3,35 +3,31 @@
 @tailwind utilities;
 
 /* ===============================
-   🎬 CINEMATIC AI THEME TOKENS
+   🎬 CINEMATIC COLOR TOKENS
 ================================ */
 :root {
-  --bg-main: #05070b;
-  --bg-glass: rgba(15, 18, 25, 0.65);
-  --border-glass: rgba(255, 255, 255, 0.08);
-
-  --text-main: #e8ebf0;
+  --bg-main: #010409;
+  --bg-surface: rgba(20, 22, 30, 0.65);
+  --border-glass: rgba(255, 255, 255, 0.1);
+  --text-main: #e6e6ff;
   --text-muted: #9aa4b2;
-
   --accent-cyan: #00f6ff;
   --accent-blue: #4da3ff;
   --accent-violet: #7c7cff;
-
   --shadow-heavy: 0 40px 120px rgba(0, 0, 0, 0.85);
 }
 
 /* ===============================
    🌌 GLOBAL RESET
 ================================ */
-html,
-body {
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background: var(--bg-main);
-  color: var(--text-main);
-  font-family: ui-sans-serif, system-ui, -apple-system;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system;
   overflow: hidden;
+  background-color: var(--bg-main);
+  color: var(--text-main);
 }
 
 /* ===============================
@@ -42,85 +38,99 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    radial-gradient(
-      circle at 50% 20%,
-      rgba(0, 246, 255, 0.12),
-      transparent 60%
-    ),
-    linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.4),
-      rgba(0, 0, 0, 0.85)
-    ),
+    radial-gradient(circle at 50% 20%, rgba(0, 246, 255, 0.12), transparent 60%),
+    linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.85)),
     url("https://www.motionelements.com/stock-image-33739443-advanced-ai-robot-in-high-tech-data-center?srsltid=AfmBOoq0MbMFWoxcGnNkI1QKEHE79TztBBS-h8IbNpmbav8KIG5QCGKs");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: saturate(1.1) contrast(1.15);
-  z-index: -2;
+  filter: saturate(1.2) contrast(1.15) brightness(0.95);
+  z-index: -1;
 }
 
 /* ===============================
    🧊 GLASS PANEL BASE
 ================================ */
 .glass {
-  background: var(--bg-glass);
-  backdrop-filter: blur(24px) saturate(140%);
-  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  background: var(--bg-surface);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
   border: 1px solid var(--border-glass);
   box-shadow: var(--shadow-heavy);
+  border-radius: 2rem;
+  transition: all 0.3s ease-in-out;
 }
 
 /* ===============================
    🧠 HEADER (CINEMATIC HUD)
 ================================ */
 header {
-  background: linear-gradient(
-    to bottom,
-    rgba(5, 7, 11, 0.85),
-    rgba(5, 7, 11, 0.4)
-  );
-  backdrop-filter: blur(18px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
   border-bottom: 1px solid var(--border-glass);
+  backdrop-filter: blur(20px);
+  background: linear-gradient(to bottom, rgba(1,4,9,0.85), rgba(1,4,9,0.4));
+}
+
+header h1 {
+  font-size: 2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  letter-spacing: 2px;
+}
+
+header button {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #000;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.25s ease-in-out;
+}
+
+header button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2);
 }
 
 /* ===============================
    💬 CHAT CONTAINERS
 ================================ */
 .chat-user {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 246, 255, 0.15),
-    rgba(0, 246, 255, 0.05)
-  );
-  border: 1px solid rgba(0, 246, 255, 0.25);
+  background: linear-gradient(135deg, rgba(0,246,255,0.2), rgba(0,246,255,0.05));
+  border: 1px solid rgba(0,246,255,0.25);
+  border-radius: 2rem;
+  padding: 1.5rem;
+  max-width: 90%;
+  font-weight: 600;
+  box-shadow: 0 20px 60px rgba(0,246,255,0.1);
 }
 
 .chat-ai {
-  background: linear-gradient(
-    135deg,
-    rgba(124, 124, 255, 0.15),
-    rgba(124, 124, 255, 0.05)
-  );
-  border: 1px solid rgba(124, 124, 255, 0.25);
+  background: linear-gradient(135deg, rgba(124,124,255,0.2), rgba(124,124,255,0.05));
+  border: 1px solid rgba(124,124,255,0.25);
+  border-radius: 2rem;
+  padding: 1.5rem;
+  max-width: 90%;
+  font-weight: 500;
+  box-shadow: 0 20px 60px rgba(124,124,255,0.1);
 }
 
 /* ===============================
    🧠 MESSAGE ANIMATION
 ================================ */
 .message {
-  animation: messageIn 0.35s ease-out both;
+  animation: fadeInUp 0.35s ease-out both;
 }
 
-@keyframes messageIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ===============================
@@ -128,6 +138,7 @@ header {
 ================================ */
 .prose {
   color: var(--text-main);
+  font-size: 1rem;
 }
 
 .prose strong {
@@ -135,10 +146,10 @@ header {
 }
 
 .prose code {
-  background: rgba(0, 246, 255, 0.15);
+  background: rgba(0,246,255,0.15);
   color: var(--accent-cyan);
-  padding: 0.2em 0.45em;
-  border-radius: 6px;
+  padding: 0.25em 0.5em;
+  border-radius: 0.5rem;
   font-weight: 600;
 }
 
@@ -146,36 +157,52 @@ header {
    📥 INPUT BAR (BOTTOM)
 ================================ */
 footer {
-  background: linear-gradient(
-    to top,
-    rgba(5, 7, 11, 0.95),
-    rgba(5, 7, 11, 0.3),
-    transparent
-  );
-  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  gap: 1rem;
+  border-top: 1px solid var(--border-glass);
+  backdrop-filter: blur(24px);
+  background: linear-gradient(to top, rgba(1,4,9,0.95), rgba(1,4,9,0.3), transparent);
 }
 
 input {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glass);
+  border-radius: 999px;
+  padding: 1rem 1.5rem;
   color: var(--text-main);
+  outline: none;
+  font-weight: 600;
 }
 
 input::placeholder {
   color: var(--text-muted);
 }
 
+button {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #000;
+  font-weight: bold;
+  padding: 1rem 1.5rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.25s ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2);
+}
+
 /* ===============================
    📱 RESPONSIVE TUNING
 ================================ */
 @media (max-width: 768px) {
-  body::before {
-    filter: brightness(0.85) contrast(1.1);
-  }
-
-  header h1 {
-    font-size: 1rem;
-  }
-
-  .glass {
-    backdrop-filter: blur(16px);
-  }
+  header h1 { font-size: 1.5rem; }
+  .chat-user, .chat-ai { padding: 1rem; font-size: 0.95rem; }
+  input { padding: 0.75rem 1rem; }
+  button { padding: 0.75rem 1rem; font-size: 0.875rem; }
 }
