@@ -3,55 +3,37 @@
 @tailwind utilities;
 
 :root {
-  --bg: #050505;
-  --surface: rgba(255, 255, 255, 0.04);
-  --text: #f8f9fa;
-  --primary: #00f3ff;
-  --border: rgba(255, 255, 255, 0.1);
-  --font-main: 'Space Grotesk', sans-serif;
-}
-
-[data-theme='light'] {
-  --bg: #ffffff;
-  --surface: rgba(0, 0, 0, 0.04);
-  --text: #1a1a1a;
-  --primary: #bc13fe;
-  --border: rgba(0, 0, 0, 0.1);
-  --font-main: 'Inter', sans-serif;
+  --bg: #020617;
+  --glass: rgba(255,255,255,0.03);
+  --border: rgba(0,246,255,0.15);
+  --cyan: #00f6ff;
+  --purple: #a855f7;
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-main);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: radial-gradient(circle at top right, #0a0a2e, #020617);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  height: 100vh;
 }
 
-.glass-panel {
-  background: var(--surface);
+.glass {
+  background: var(--glass);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border);
 }
 
-.chat-bubble-user {
-  background: var(--primary);
-  color: #000;
-  font-weight: 600;
+.glow-btn:hover {
+  box-shadow: 0 0 20px rgba(0,246,255,0.4);
+  transform: translateY(-1px);
 }
 
-.chat-bubble-ai {
-  background: var(--surface);
-  border: 1px solid var(--border);
+.text-gradient {
+  background: linear-gradient(90deg, #00f6ff, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Performance Optimized Scanlines only for Dark Mode */
-[data-theme='dark'] body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-  background-size: 100% 4px;
-  z-index: 50;
-  pointer-events: none;
-  opacity: 0.3;
-}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
