@@ -1,176 +1,111 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+
+import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import VoiceControls from "@/components/VoiceControls";
 
-export default function PrometheusAtoZ() {
+export default function Page() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [scrollPct, setScrollPct] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  /* ---------- CURSOR GLOW ---------- */
   useEffect(() => {
-    const move = (e: MouseEvent) => {
-      if (!glowRef.current) return;
-      glowRef.current.style.transform = `translate(${e.clientX - 150}px, ${e.clientY - 150}px)`;
-    };
-    window.addEventListener("mousemove", move);
-    return () => window.removeEventListener("mousemove", move);
-  }, []);
-
-  /* ---------- THEME ---------- */
-  useEffect(() => {
-    document.documentElement.classList.toggle("light", theme === "light");
+    document.body.className = theme;
   }, [theme]);
 
-  /* ---------- SCROLL ---------- */
-  const handleScroll = () => {
-    if (!scrollRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    setScrollPct((scrollTop / (scrollHeight - clientHeight)) * 100);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const speak = (text: string) => {
+    const utter = new SpeechSynthesisUtterance(text);
+    speechSynthesis.speak(utter);
   };
 
-  const scrollToBottom = () => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  };
-
-  /* ---------- STREAMING SSE ---------- */
-  const streamResponse = async (userMsg: any) => {
-    setMessages((p) => [...p, { role: "assistant", content: "" }]);
+  const sendMessage = async (content: string) => {
+    setMessages((m) => [...m, { role: "user", content }]);
+    setInput("");
 
     const res = await fetch("/api/chat", {
       method: "POST",
-      body: JSON.stringify({ messages: [...messages, userMsg] }),
+      body: JSON.stringify({
+        messages: [...messages, { role: "user", content }],
+      }),
     });
 
-    const reader = res.body?.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
+    const reader = res.body!.getReader();
+    let aiText = "";
+    setMessages((m) => [...m, { role: "assistant", content: "" }]);
 
-    while (!done) {
-      const { value, done: d } = await reader!.read();
-      done = d;
-      const chunk = decoder.decode(value || new Uint8Array());
-      if (!chunk) continue;
-
-      setMessages((prev) => {
-        const copy = [...prev];
-        copy[copy.length - 1].content += chunk;
-        return copy;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      aiText += new TextDecoder().decode(value);
+      setMessages((m) => {
+        const updated = [...m];
+        updated[updated.length - 1].content = aiText;
+        return updated;
       });
-      scrollToBottom();
     }
-  };
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-    const userMsg = { role: "user", content: input };
-    setMessages((p) => [...p, userMsg]);
-    setInput("");
-    setLoading(true);
-    await streamResponse(userMsg);
-    setLoading(false);
+    speak(aiText);
   };
 
   return (
-    <main className="relative min-h-screen bg-bg text-text overflow-hidden transition-colors duration-700">
-      {/* CURSOR GLOW */}
-      <div
-        ref={glowRef}
-        className="pointer-events-none fixed top-0 left-0 w-[300px] h-[300px] rounded-full blur-3xl opacity-40 bg-primary"
-      />
-
-      {/* SCROLL HUD */}
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 h-40 w-[3px] bg-border z-50">
-        <div
-          className="bg-primary w-full transition-all"
-          style={{ height: `${scrollPct}%` }}
-        />
-      </div>
-
-      {/* HEADER */}
-      <header className="h-24 flex justify-between items-center px-10 border-b border-border backdrop-blur-xl bg-surface z-40">
-        <div>
-          <h1 className="text-3xl font-black italic uppercase">Prometheus</h1>
-          <p className="text-[10px] tracking-[0.5em] text-primary opacity-70">
-            SOVEREIGN INTELLIGENCE • LIKITH NAIDU
-          </p>
-        </div>
+    <main className="flex flex-col h-screen">
+      <header className="flex justify-between p-4 border-b border-cyan-500/20">
+        <h1 className="text-xl font-bold text-cyan-400">Prometheus AI</h1>
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="text-xs px-4 py-2 border border-border rounded-full"
+          className="px-3 py-1 rounded border"
         >
-          {theme === "dark" ? "☀ LIGHT" : "🌑 DARK"}
+          🌗
         </button>
       </header>
 
-      {/* CHAT */}
-      <section
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="h-[calc(100vh-240px)] overflow-y-auto px-6 md:px-[22%] py-16 space-y-12"
-        style={{ WebkitOverflowScrolling: "touch" }}
-      >
+      <section className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div
-              className={`max-w-[90%] p-8 rounded-[36px] ${
-                m.role === "user"
-                  ? "bg-primary text-black font-bold"
-                  : "bg-surface border border-border"
-              }`}
+          <div key={i} className="message">
+            <strong>{m.role === "user" ? "You" : "AI"}:</strong>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code({ inline, className, children }) {
+                  if (inline) return <code>{children}</code>;
+                  return (
+                    <SyntaxHighlighter style={atomDark}>
+                      {String(children)}
+                    </SyntaxHighlighter>
+                  );
+                },
+              }}
             >
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                className="prose prose-invert max-w-none"
-                components={{
-                  code({ inline, className, children }: any) {
-                    const match = /language-(\w+)/.exec(className || "");
-                    return !inline && match ? (
-                      <SyntaxHighlighter style={atomDark} language={match[1]}>
-                        {String(children)}
-                      </SyntaxHighlighter>
-                    ) : (
-                      <code className="bg-primary/20 px-2 py-1 rounded">
-                        {children}
-                      </code>
-                    );
-                  },
-                }}
-              >
-                {m.content}
-              </ReactMarkdown>
-            </div>
+              {m.content}
+            </ReactMarkdown>
           </div>
         ))}
+        <div ref={bottomRef} />
       </section>
 
-      {/* INPUT */}
-      <footer className="h-36 flex items-center justify-center bg-gradient-to-t from-bg via-bg/80">
-        <div className="w-full max-w-4xl flex gap-4 px-6">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            className="flex-1 bg-surface border border-border px-8 py-6 rounded-full text-xl outline-none caret-primary"
-            placeholder="Inject sovereign instruction…"
-          />
-          <button
-            onClick={handleSend}
-            className="bg-primary text-black px-12 rounded-full font-black"
-          >
-            EXECUTE
-          </button>
-        </div>
+      <footer className="p-4 border-t border-cyan-500/20 flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
+          className="flex-1 px-3 py-2 rounded bg-transparent border"
+          placeholder="Ask anything..."
+        />
+        <VoiceControls onResult={sendMessage} />
+        <button
+          onClick={() => sendMessage(input)}
+          className="px-4 py-2 rounded bg-cyan-500 text-black"
+        >
+          Send
+        </button>
       </footer>
     </main>
   );

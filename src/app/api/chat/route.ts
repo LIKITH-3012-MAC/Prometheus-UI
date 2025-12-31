@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
 import { Groq } from "groq-sdk";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -13,20 +12,22 @@ export async function POST(req: Request) {
   });
 
   const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of stream) {
-        const token = chunk.choices[0]?.delta?.content || "";
-        controller.enqueue(encoder.encode(token));
-      }
-      controller.close();
-    },
-  });
 
-  return new NextResponse(readable, {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Transfer-Encoding": "chunked",
-    },
-  });
+  return new Response(
+    new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          const token = chunk.choices[0]?.delta?.content;
+          if (token) controller.enqueue(encoder.encode(token));
+        }
+        controller.close();
+      },
+    }),
+    {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+      },
+    }
+  );
 }

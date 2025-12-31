@@ -1,17 +1,18 @@
-import './globals.css';
-import { AuthProvider } from '@/components/AuthProvider';
+import "./globals.css";
 
 export const metadata = {
-  title: 'Prometheus AI | Neural Link',
-  description: 'Enterprise AI developed by Likith Naidu',
+  title: "Prometheus AI",
+  description: "Cinematic AI Interface",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
-      <body>
-        <AuthProvider>{children}</AuthProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

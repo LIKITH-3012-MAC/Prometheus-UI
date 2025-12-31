@@ -2,40 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-/* DARK */
+/* THEME TOKENS */
 :root {
-  --bg: #05070c;
-  --surface: rgba(255,255,255,0.05);
-  --text: #ffffff;
-  --primary: #00f6ff;
-  --border: rgba(255,255,255,0.12);
+  --bg-dark: #050505;
+  --bg-light: #f5f7fa;
+  --text-dark: #f8f9fa;
+  --text-light: #050505;
+  --accent: #00f6ff;
 }
 
-/* LIGHT */
-.light {
-  --bg: #f4f7fb;
-  --surface: rgba(0,0,0,0.05);
-  --text: #05070c;
-  --primary: #0066ff;
-  --border: rgba(0,0,0,0.12);
-}
-
-html, body {
+html,
+body {
   height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  overscroll-behavior: none;
+  margin: 0;
+  font-family: ui-sans-serif, system-ui;
 }
 
-.bg-bg { background: var(--bg); }
-.bg-surface { background: var(--surface); }
-.text-text { color: var(--text); }
-.bg-primary { background: var(--primary); }
-.text-primary { color: var(--primary); }
-.border-border { border-color: var(--border); }
+body.dark {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 20px;
+body.light {
+  background: var(--bg-light);
+  color: var(--text-light);
+}
+
+/* MESSAGE ANIMATION */
+.message {
+  animation: fadeIn 0.35s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
