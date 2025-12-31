@@ -1,112 +1,87 @@
 "use client";
-
-import { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import VoiceControls from "@/components/VoiceControls";
 
-export default function Page() {
-  const [messages, setMessages] = useState<any[]>([]);
+export default function PrometheusPage() {
+  const [messages, setMessages] = useState<{role: string, content: string}[]>([]);
   const [input, setInput] = useState("");
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [ttsEnabled, setTtsEnabled] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    document.body.className = theme;
-  }, [theme]);
+  const sendMessage = async (text: string) => {
+    if (!text.trim()) return;
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const speak = (text: string) => {
-    const utter = new SpeechSynthesisUtterance(text);
-    speechSynthesis.speak(utter);
-  };
-
-  const sendMessage = async (content: string) => {
-    setMessages((m) => [...m, { role: "user", content }]);
+    const newMsg = { role: "user", content: text };
+    setMessages(prev => [...prev, newMsg]);
     setInput("");
+    setLoading(true);
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      body: JSON.stringify({
-        messages: [...messages, { role: "user", content }],
-      }),
-    });
-
-    const reader = res.body!.getReader();
-    let aiText = "";
-    setMessages((m) => [...m, { role: "assistant", content: "" }]);
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      aiText += new TextDecoder().decode(value);
-      setMessages((m) => {
-        const updated = [...m];
-        updated[updated.length - 1].content = aiText;
-        return updated;
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [...messages, newMsg] }),
       });
-    }
 
-    speak(aiText);
+      const data = await res.json();
+      const aiText = data.content || "⚠️ No response";
+      setMessages(prev => [...prev, { role: "ai", content: aiText }]);
+
+      // Dispatch AI response for TTS
+      window.dispatchEvent(new CustomEvent("ai-response", { detail: aiText }));
+    } catch (err) {
+      console.error(err);
+      setMessages(prev => [...prev, { role: "ai", content: "⚠️ Network error." }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <main className="flex flex-col h-screen">
-      <header className="flex justify-between p-4 border-b border-cyan-500/20">
-        <h1 className="text-xl font-bold text-cyan-400">Prometheus AI</h1>
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="px-3 py-1 rounded border"
-        >
-          🌗
-        </button>
-      </header>
+    <div className="flex flex-col h-screen p-4 gap-4 bg-[#010409] text-[#e6e6ff]">
+      <header className="text-xl sm:text-2xl font-bold text-center sm:text-left">PROMETHEUS 🌌</header>
 
-      <section className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto flex flex-col gap-2 p-2 sm:p-0">
         {messages.map((m, i) => (
-          <div key={i} className="message">
-            <strong>{m.role === "user" ? "You" : "AI"}:</strong>
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                code({ inline, className, children }) {
-                  if (inline) return <code>{children}</code>;
-                  return (
-                    <SyntaxHighlighter style={atomDark}>
-                      {String(children)}
-                    </SyntaxHighlighter>
-                  );
-                },
-              }}
-            >
-              {m.content}
-            </ReactMarkdown>
+          <div
+            key={i}
+            className={`p-3 rounded-lg max-w-full sm:max-w-xl break-words ${
+              m.role === "user" ? "bg-cyan-900 self-end" : "bg-gray-800 self-start"
+            }`}
+          >
+            <ReactMarkdown>{m.content}</ReactMarkdown>
           </div>
         ))}
-        <div ref={bottomRef} />
-      </section>
+        {loading && <div className="text-gray-400">AI is thinking...</div>}
+      </div>
 
-      <footer className="p-4 border-t border-cyan-500/20 flex gap-2">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
-          className="flex-1 px-3 py-2 rounded bg-transparent border"
-          placeholder="Ask anything..."
+      <footer className="flex flex-col sm:flex-row gap-2 items-center">
+        <VoiceControls
+          onVoiceResult={sendMessage}
+          ttsEnabled={ttsEnabled}
         />
-        <VoiceControls onResult={sendMessage} />
+        <input
+          type="text"
+          placeholder="Type your message..."
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && sendMessage(input)}
+          className="flex-1 px-3 py-2 rounded bg-gray-700 text-white w-full sm:w-auto"
+        />
         <button
           onClick={() => sendMessage(input)}
-          className="px-4 py-2 rounded bg-cyan-500 text-black"
+          className="px-4 py-2 rounded bg-cyan-500 text-black w-full sm:w-auto"
         >
           Send
         </button>
+        <button
+          onClick={() => setTtsEnabled(!ttsEnabled)}
+          className={`px-3 py-1 rounded text-black w-full sm:w-auto ${ttsEnabled ? "bg-green-400" : "bg-red-400"}`}
+        >
+          {ttsEnabled ? "TTS On" : "TTS Off"}
+        </button>
       </footer>
-    </main>
+    </div>
   );
 }
