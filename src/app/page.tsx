@@ -1,19 +1,23 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
+import UltraInput, { useSpeech } from "./components/UltraInput";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import Starfield, { MicWaveform } from "./components/Starfield";
-import UltraChatInput from "./components/UltraChatInput";
 
-export default function PrometheusUltra() {
-  const [messages, setMessages] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export default function PrometheusUltraPage() {
+  const [messages, setMessages] = useState<Message[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollRef.current)
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
   const typeMessage = (text: string) => {
@@ -22,7 +26,7 @@ export default function PrometheusUltra() {
     const interval = setInterval(() => {
       setMessages(prev => {
         const updated = [...prev];
-        updated[updated.length - 1] = { ...updated[updated.length - 1], content: text.slice(0, i + 1) };
+        updated[updated.length - 1].content = text.slice(0, i + 1);
         return updated;
       });
       i++;
@@ -30,61 +34,50 @@ export default function PrometheusUltra() {
     }, 10);
   };
 
-  const handleSend = async (userText: string) => {
-    if (!userText || loading) return;
-    const userMsg = { role: "user", content: userText };
-    setMessages(p => [...p, userMsg]);
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, userMsg] }),
-      });
-      const data = await res.json();
-      typeMessage(data.content);
-    } finally {
-      setLoading(false);
-    }
+  const handleSend = (text: string) => {
+    if (!text.trim()) return;
+    setMessages(prev => [...prev, { role: "user", content: text }]);
+    // AI echo + TTS
+    typeMessage(`Echo: ${text}`);
   };
 
   return (
-    <main className="h-screen w-screen relative overflow-hidden">
-      {/* Starfield Background */}
-      <div className="absolute inset-0 -z-10">
-        <Starfield />
-      </div>
-
-      {/* Header HUD */}
-      <header className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-20">
-        <h1 className="text-4xl font-black text-vibgyor uppercase tracking-tight">PROMETHEUS ULTRA</h1>
-        <p className="text-xs font-bold text-cyan-400 opacity-70 tracking-widest">NEURAL LINK • LIKITH NAIDU</p>
+    <main className="h-screen w-screen bg-gradient-to-br from-[#020617] to-[#0a0a2e] relative flex flex-col">
+      {/* Header */}
+      <header className="text-center py-6">
+        <h1 className="text-4xl font-black text-vibgyor uppercase">PROMETHEUS ULTRA</h1>
+        <p className="text-xs tracking-widest text-cyan-400 mt-1">NEURAL LINK • LIKITH NAIDU</p>
       </header>
 
-      {/* Cosmic Scroll Chat Area */}
-      <div ref={scrollRef} className="absolute top-24 bottom-32 left-0 right-0 px-4 md:px-[20%] overflow-y-auto space-y-6 scroll-smooth">
+      {/* Chat area */}
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto px-6 space-y-4 pb-32"
+      >
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-3`}>
-            <div className={`p-6 rounded-3xl max-w-[95%] ${m.role === "user" ? "chat-user glow-purple" : "glass chat-ai"}`}>
+          <div
+            key={i}
+            className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`p-4 rounded-2xl max-w-[80%] 
+                ${m.role === "user"
+                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                  : "bg-gradient-to-r from-cyan-500 to-indigo-500 text-white"}`}
+            >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-                className="prose prose-invert max-w-none text-sm md:text-base leading-relaxed"
                 components={{
                   code({ node, inline, className, children, ...props }: any) {
-                    const match = /language-(\w+)/.exec(className || "");
+                    const match = /language-(\w+)/.exec(className || '');
                     return !inline && match ? (
-                      <div className="my-6 rounded-xl overflow-hidden border border-white/5 shadow-2xl">
-                        <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>
-                          {String(children).replace(/\n$/, "")}
-                        </SyntaxHighlighter>
-                      </div>
+                      <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>
+                        {String(children).replace(/\n$/, '')}
+                      </SyntaxHighlighter>
                     ) : (
-                      <code className="bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded font-mono" {...props}>
-                        {children}
-                      </code>
+                      <code className="bg-white/10 px-1 py-0.5 rounded font-mono" {...props}>{children}</code>
                     );
-                  },
+                  }
                 }}
               >
                 {m.content}
@@ -92,15 +85,10 @@ export default function PrometheusUltra() {
             </div>
           </div>
         ))}
-        {loading && (
-          <div className="ai-thinking text-[10px] text-cyan-500 font-black tracking-widest px-4">
-            SYNCING NEURAL NETWORK...
-          </div>
-        )}
       </div>
 
-      {/* Bottom ULTRA Chat Input with STT/TTS */}
-      <UltraChatInput onSend={handleSend} />
+      {/* Bottom-center ULTRA Input */}
+      <UltraInput onSend={handleSend} />
     </main>
   );
 }
