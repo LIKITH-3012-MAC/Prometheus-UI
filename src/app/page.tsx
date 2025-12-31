@@ -1,43 +1,41 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Mic, MicOff, Send, Cpu, Zap, Command } from "lucide-react";
+import Starfield, { MicWaveform } from "./components/Starfield";
+import UltraChatInput from "./components/UltraChatInput";
 
-export default function PrometheusULTRA() {
+export default function PrometheusUltra() {
   const [messages, setMessages] = useState<any[]>([]);
-  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [listening, setListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current)
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
   const typeMessage = (text: string) => {
     let i = 0;
-    setMessages(p => [...p, { role: "assistant", content: "" }]);
+    setMessages(prev => [...prev, { role: "assistant", content: "" }]);
     const interval = setInterval(() => {
-      setMessages(p => {
-        const u = [...p];
-        u[u.length - 1].content = text.slice(0, i + 1);
-        return u;
+      setMessages(prev => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { ...updated[updated.length - 1], content: text.slice(0, i + 1) };
+        return updated;
       });
       i++;
       if (i >= text.length) clearInterval(interval);
-    }, 7);
+    }, 10);
   };
 
-  const handleSend = async () => {
-    if (!input || loading) return;
-    const userMsg = { role: "user", content: input };
+  const handleSend = async (userText: string) => {
+    if (!userText || loading) return;
+    const userMsg = { role: "user", content: userText };
     setMessages(p => [...p, userMsg]);
-    setInput("");
     setLoading(true);
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -52,68 +50,37 @@ export default function PrometheusULTRA() {
   };
 
   return (
-    <main className="h-screen flex flex-col relative overflow-hidden">
+    <main className="h-screen w-screen relative overflow-hidden">
+      {/* Starfield Background */}
+      <div className="absolute inset-0 -z-10">
+        <Starfield />
+      </div>
 
-      {/* ===== FLOATING AI CORE ===== */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                      w-40 h-40 rounded-full ai-thinking opacity-30 pointer-events-none" />
-
-      {/* ===== TOP HUD ===== */}
-      <header className="flex justify-between items-center px-6 py-4 z-10">
-        <div>
-          <h1 className="text-3xl font-black text-gradient uppercase">
-            Prometheus
-          </h1>
-          <p className="text-[10px] tracking-[0.4em] text-cyan-400 opacity-60">
-            ULTRA NEURAL OS
-          </p>
-        </div>
-
-        <div className="flex gap-3">
-          <div className="glass px-3 py-2 text-[10px] text-cyan-400 flex gap-2">
-            <Cpu size={12}/> CPU 99%
-          </div>
-          <div className="glass px-3 py-2 text-[10px] text-purple-400 flex gap-2">
-            <Zap size={12}/> LATENCY 12ms
-          </div>
-          <div className="glass px-3 py-2 text-[10px] text-pink-400 flex gap-2">
-            <Command size={12}/> ⌘ + Enter
-          </div>
-        </div>
+      {/* Header HUD */}
+      <header className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-20">
+        <h1 className="text-4xl font-black text-vibgyor uppercase tracking-tight">PROMETHEUS ULTRA</h1>
+        <p className="text-xs font-bold text-cyan-400 opacity-70 tracking-widest">NEURAL LINK • LIKITH NAIDU</p>
       </header>
 
-      {/* ===== CHAT STREAM ===== */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto px-6 md:px-[22%] space-y-8 pb-44"
-      >
-        {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center space-y-6">
-            <div className="w-24 h-24 rounded-full glass-strong ai-thinking flex items-center justify-center">
-              <div className="w-5 h-5 rounded-full bg-cyan-400 glow-cyan"></div>
-            </div>
-            <p className="text-[11px] tracking-[0.4em] text-white/30 uppercase">
-              Awaiting Ultra Command
-            </p>
-          </div>
-        )}
-
+      {/* Cosmic Scroll Chat Area */}
+      <div ref={scrollRef} className="absolute top-24 bottom-32 left-0 right-0 px-4 md:px-[20%] overflow-y-auto space-y-6 scroll-smooth">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`p-6 rounded-[26px] max-w-[90%]
-              ${m.role === "user" ? "chat-user" : "glass chat-ai"}`}>
+          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-3`}>
+            <div className={`p-6 rounded-3xl max-w-[95%] ${m.role === "user" ? "chat-user glow-purple" : "glass chat-ai"}`}>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-                className="prose prose-invert max-w-none"
+                className="prose prose-invert max-w-none text-sm md:text-base leading-relaxed"
                 components={{
-                  code({ inline, className, children }: any) {
+                  code({ node, inline, className, children, ...props }: any) {
                     const match = /language-(\w+)/.exec(className || "");
                     return !inline && match ? (
-                      <SyntaxHighlighter style={atomDark} language={match[1]}>
-                        {String(children)}
-                      </SyntaxHighlighter>
+                      <div className="my-6 rounded-xl overflow-hidden border border-white/5 shadow-2xl">
+                        <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>
+                          {String(children).replace(/\n$/, "")}
+                        </SyntaxHighlighter>
+                      </div>
                     ) : (
-                      <code className="bg-cyan-500/20 text-cyan-300 px-1 rounded">
+                      <code className="bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded font-mono" {...props}>
                         {children}
                       </code>
                     );
@@ -125,64 +92,15 @@ export default function PrometheusULTRA() {
             </div>
           </div>
         ))}
-
         {loading && (
-          <div className="text-[10px] tracking-widest text-cyan-400">
-            STREAMING TOKENS ▓▓▓▓▓▒▒▒
+          <div className="ai-thinking text-[10px] text-cyan-500 font-black tracking-widest px-4">
+            SYNCING NEURAL NETWORK...
           </div>
         )}
       </div>
 
-      {/* ===== BOTTOM COMMAND CONSOLE ===== */}
-      <footer className="fixed bottom-6 left-0 right-0 px-6 md:px-[22%] z-20">
-        <div className="glass-strong flex items-center gap-3 px-4 py-3 rounded-full hover-glow">
-
-          {/* MIC */}
-          <button
-            onClick={() => setListening(!listening)}
-            className={`w-12 h-12 rounded-full flex items-center justify-center
-              ${listening
-                ? "bg-red-500 animate-pulse"
-                : "bg-gradient-to-br from-cyan-400 to-purple-500"}
-              hover:scale-110 transition`}
-          >
-            {listening ? <MicOff size={20} className="text-black"/> :
-                         <Mic size={20} className="text-black"/>}
-          </button>
-
-          {/* WAVEFORM */}
-          {listening && (
-            <div className="flex gap-1 items-center">
-              {[...Array(6)].map((_, i) => (
-                <span key={i}
-                  className="w-1 h-6 bg-cyan-400 animate-pulse rounded"
-                  style={{ animationDelay: `${i * 0.1}s` }}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* INPUT */}
-          <input
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSend()}
-            placeholder="Speak or type an ULTRA command…"
-            className="flex-1 bg-transparent px-6 py-4 text-white
-                       placeholder:text-white/30 outline-none text-lg"
-          />
-
-          {/* SEND */}
-          <button
-            onClick={handleSend}
-            className="w-12 h-12 rounded-full flex items-center justify-center
-                       bg-gradient-to-br from-purple-500 to-pink-500
-                       hover:scale-110 transition"
-          >
-            <Send size={18} className="text-black"/>
-          </button>
-        </div>
-      </footer>
+      {/* Bottom ULTRA Chat Input with STT/TTS */}
+      <UltraChatInput onSend={handleSend} />
     </main>
   );
 }

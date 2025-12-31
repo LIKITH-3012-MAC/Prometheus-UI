@@ -30,6 +30,7 @@
 
   --glow-cyan: 0 0 40px rgba(0,246,255,0.6);
   --glow-purple: 0 0 40px rgba(168,85,247,0.6);
+  --glow-pink: 0 0 40px rgba(236,72,153,0.6);
 }
 
 /* ---------- GLOBAL ---------- */
@@ -38,14 +39,12 @@
 }
 
 body {
-  background:
-    radial-gradient(circle at 10% 20%, rgba(0,246,255,0.12), transparent 50%),
-    radial-gradient(circle at 90% 80%, rgba(168,85,247,0.18), transparent 55%),
-    linear-gradient(180deg, #030712, #020617);
+  background: radial-gradient(circle at 10% 20%, rgba(0,246,255,0.12), rgba(168,85,247,0.18)) , linear-gradient(180deg, #030712, #020617);
   color: #f8fafc;
   font-family: 'Inter', system-ui, sans-serif;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
 /* ---------- GLASS SYSTEM ---------- */
@@ -53,35 +52,25 @@ body {
   background: var(--glass-light);
   backdrop-filter: blur(18px) saturate(160%);
   border: 1px solid var(--border-soft);
+  border-radius: 1.5rem;
 }
 
 .glass-strong {
   background: var(--glass-strong);
   backdrop-filter: blur(26px) saturate(180%);
   border: 1px solid var(--border-neon);
+  border-radius: 2rem;
 }
 
 /* ---------- TEXT ---------- */
 .text-gradient {
-  background: linear-gradient(90deg,
-    var(--cyan),
-    var(--purple),
-    var(--pink)
-  );
+  background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-vibgyor {
-  background: linear-gradient(90deg,
-    var(--red),
-    var(--orange),
-    var(--yellow),
-    var(--green),
-    var(--blue),
-    var(--indigo),
-    var(--violet)
-  );
+  background: linear-gradient(90deg, var(--red), var(--orange), var(--yellow), var(--green), var(--blue), var(--indigo), var(--violet));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -100,27 +89,19 @@ body {
 }
 
 .btn-neon:hover {
-  transform: translateY(-2px) scale(1.04);
-  box-shadow:
-    0 0 20px rgba(0,246,255,0.6),
-    0 0 50px rgba(168,85,247,0.6);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 20px rgba(0,246,255,0.6), 0 0 50px rgba(168,85,247,0.6);
 }
 
 /* ---------- CHAT BUBBLES ---------- */
 .chat-user {
-  background: linear-gradient(135deg,
-    rgba(168,85,247,0.35),
-    rgba(236,72,153,0.25)
-  );
+  background: linear-gradient(135deg, rgba(168,85,247,0.35), rgba(236,72,153,0.25));
   border: 1px solid rgba(168,85,247,0.6);
   box-shadow: var(--glow-purple);
 }
 
 .chat-ai {
-  background: linear-gradient(135deg,
-    rgba(0,246,255,0.12),
-    rgba(99,102,241,0.12)
-  );
+  background: linear-gradient(135deg, rgba(0,246,255,0.12), rgba(99,102,241,0.12));
   border: 1px solid rgba(0,246,255,0.4);
 }
 
@@ -135,10 +116,10 @@ input::placeholder {
 }
 
 input:focus {
-  text-shadow: 0 0 6px rgba(0,246,255,0.5);
+  text-shadow: 0 0 6px rgba(0,246,255,0.35);
 }
 
-/* ---------- AI THINKING ---------- */
+/* ---------- AI THINKING DOTS ---------- */
 .ai-thinking {
   position: relative;
 }
@@ -148,73 +129,77 @@ input:focus {
   position: absolute;
   inset: -6px;
   border-radius: 999px;
-  background: conic-gradient(
-    var(--cyan),
-    var(--purple),
-    var(--pink),
-    var(--cyan)
-  );
+  background: conic-gradient(var(--cyan), var(--purple), var(--pink), var(--cyan));
   filter: blur(18px);
   opacity: 0.4;
   animation: spin 6s linear infinite;
   z-index: -1;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ---------- GLOW HELPERS ---------- */
-.glow-cyan {
-  box-shadow: var(--glow-cyan);
-}
-
-.glow-purple {
-  box-shadow: var(--glow-purple);
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- SCROLLBAR ---------- */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    var(--cyan),
-    var(--purple)
-  );
+  background: linear-gradient(var(--cyan), var(--purple));
   border-radius: 10px;
+}
+
+/* ---------- GLOW HELPERS ---------- */
+.glow-cyan { box-shadow: var(--glow-cyan);}
+.glow-purple { box-shadow: var(--glow-purple);}
+.glow-pink { box-shadow: var(--glow-pink);}
+
+/* ---------- PERLA FLOW (VIBGYOR ANIMATION) ---------- */
+@keyframes perla-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.perla {
+  background: linear-gradient(270deg, var(--cyan), var(--pink), var(--purple), var(--green), var(--yellow), var(--red));
+  background-size: 600% 600%;
+  animation: perla-flow 12s ease infinite;
+  border-radius: 1.5rem;
+}
+
+/* ---------- COSMIC GRID SCANLINES ---------- */
+body::after {
+  content: '';
+  position: absolute;
+  inset:0;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 95%,
+    rgba(255,255,255,0.03) 95%,
+    rgba(255,255,255,0.03) 100%
+  );
+  pointer-events: none;
+  opacity: 0.2;
+  z-index: 1;
+}
+
+/* ---------- STARFIELD GLOW NODES ---------- */
+@keyframes pulse-node {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.6); opacity: 0.2; }
 }
 
 /* ---------- HOVER FX ---------- */
 .hover-glow:hover {
-  box-shadow:
-    0 0 15px rgba(0,246,255,0.5),
-    0 0 40px rgba(168,85,247,0.4);
-}
-
-/* ---------- GRID SCANLINES ---------- */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    linear-gradient(
-      transparent 95%,
-      rgba(255,255,255,0.03)
-    );
-  background-size: 100% 4px;
-  pointer-events: none;
-  opacity: 0.2;
+  box-shadow: 0 0 15px rgba(0,246,255,0.5), 0 0 40px rgba(168,85,247,0.4);
 }
 
 /* ---------- FUTURE PLACEHOLDERS ---------- */
-/* WebGL canvas */
-/* Voice waveform */
-/* Reactor core */
-/* Theme switcher */
-/* Neural nodes */
-/* Quantum particles */
-
+/* WebGL canvas (Starfield + Orb + Nodes) */
+/* Voice waveform animations */
+/* Reactor core pulses */
+/* Theme switcher UI */
+/* Neural nodes & quantum particles */
 /* =========================================================
-   🚀 END :: PROMETHEUS ULTRA VIBGYOR
+   🚀 END :: PROMETHEUS ULTRA VIBGYOR COSMIC
 ========================================================= */
