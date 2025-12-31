@@ -3,65 +3,54 @@
 @tailwind utilities;
 
 :root {
-  --void: #020617;
-  --nebula: #0a0a2e;
-  --glass: rgba(255,255,255,0.04);
-  --border-soft: rgba(255,255,255,0.08);
-  --border-neon: rgba(0,246,255,0.22);
-  --violet: #8b5cf6;
-  --indigo: #6366f1;
-  --blue: #3b82f6;
-  --green: #22c55e;
-  --yellow: #eab308;
-  --orange: #f97316;
-  --red: #ef4444;
-  --cyan: #00f6ff;
-  --purple: #a855f7;
-  --mint: #2dd4bf;
-  --r-md: 16px;
+  --cyan-glow: #00f6ff;
+  --gold-accent: #ffd700;
+  --deep-void: #010409;
+  --neural-purple: #a855f7;
 }
 
 body {
-  background: radial-gradient(circle at top right, #0a0a2e, #020617), radial-gradient(circle at bottom left, #030b3a, #000);
+  background: radial-gradient(circle at 50% 50%, #0a0a2e 0%, #010409 100%);
   color: white;
   font-family: 'Inter', system-ui, sans-serif;
   overflow: hidden;
   height: 100vh;
 }
 
-.glass {
-  background: var(--glass);
-  backdrop-filter: blur(22px) saturate(180%);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--r-md);
+/* 💎 LUXURY GLASS */
+.billion-glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 256, 255, 0.08);
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
 }
 
-.text-gradient {
-  background: linear-gradient(90deg, var(--cyan), var(--purple));
+/* ✨ NEURAL TEXT */
+.text-billionaire {
+  background: linear-gradient(135deg, #fff 0%, #00f6ff 50%, #a855f7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(0, 246, 255, 0.4));
 }
 
-.chat-ai {
-  background: linear-gradient(135deg, rgba(0,246,255,.12), rgba(168,85,247,.12));
-  border-left: 3px solid var(--cyan);
+/* 🌀 LIVING GRADIENT FOR CHAT */
+.chat-luxury-ai {
+  background: linear-gradient(135deg, rgba(0,246,255,0.05) 0%, rgba(168,85,247,0.05) 100%);
+  border-left: 2px solid var(--cyan-glow);
+  box-shadow: inset 0 0 20px rgba(0,246,255,0.05);
 }
 
-.chat-user {
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
-  color: black;
-  font-weight: 600;
+.chat-luxury-user {
+  background: linear-gradient(135deg, #00f6ff 0%, #a855f7 100%);
+  color: #000;
+  font-weight: 800;
+  box-shadow: 0 10px 40px rgba(0, 246, 255, 0.3);
 }
 
-@keyframes ai-pulse {
-  0% { opacity: .25; transform: scale(.96); }
-  50% { opacity: 1; transform: scale(1); }
-  100% { opacity: .25; transform: scale(.96); }
+/* ⚡️ MOTION KEYFRAMES */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
-.ai-thinking { animation: ai-pulse 1.4s infinite ease-in-out; }
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(var(--cyan), var(--purple));
-  border-radius: 10px;
-}
+.floating { animation: float 6s ease-in-out infinite; }
