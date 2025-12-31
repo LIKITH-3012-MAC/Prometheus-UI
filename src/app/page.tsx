@@ -5,7 +5,7 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-export default function PrometheusCosmicUI() {
+export default function PrometheusHardLockedUI() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,35 +57,34 @@ export default function PrometheusCosmicUI() {
   };
 
   return (
-    <main className="h-screen w-screen bg-[#020617] flex flex-col relative overflow-hidden">
-      {/* 1. Header HUD (Shrink-0 prevents it from resizing) */}
-      <header className="shrink-0 flex justify-between items-center p-6 z-10 backdrop-blur-md border-b border-white/5">
+    <main className="fixed inset-0 bg-[#020617] flex flex-col font-sans overflow-hidden">
+      {/* 1. Locked Header */}
+      <header className="w-full h-20 flex justify-between items-center px-6 md:px-12 z-50 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5">
         <div className="flex flex-col">
           <h1 className="text-3xl font-black tracking-tighter text-gradient uppercase italic">Prometheus</h1>
-          <p className="text-[10px] tracking-[0.4em] font-bold text-cyan-400 opacity-70">NEURAL LINK • LIKITH NAIDU</p>
+          <p className="text-[9px] tracking-[0.4em] font-bold text-cyan-400 opacity-60">NEURAL LINK • LIKITH NAIDU</p>
         </div>
-        <div className="flex gap-3">
-           <button onClick={startSTT} className={`glass px-4 py-2 text-[10px] font-bold transition-all ${isListening ? 'text-red-500 animate-pulse border-red-500' : 'text-cyan-400'}`}>
-             {isListening ? 'LISTENING...' : 'VOICE'}
-           </button>
-           <div className="glass px-4 py-2 text-[10px] font-bold text-zinc-500">V.70B</div>
+        <div className="flex gap-4">
+          <button onClick={startSTT} className={`glass px-5 py-2 text-[10px] font-bold tracking-widest transition-all ${isListening ? 'text-red-500 border-red-500 animate-pulse' : 'text-cyan-400 border-cyan-500/20'}`}>
+            {isListening ? 'LISTENING' : 'VOICE'}
+          </button>
         </div>
       </header>
 
-      {/* 2. Chat Stream Area (Flex-1 takes up all remaining middle space) */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-[20%] pt-10 pb-40 space-y-10 scroll-smooth">
+      {/* 2. Isolated Scrollable Chat Area */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-[25%] py-10 space-y-10 scroll-smooth custom-scrollbar bg-radial-gradient">
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center space-y-6 opacity-30">
-             <div className="w-12 h-12 rounded-full border border-cyan-500/30 flex items-center justify-center ai-thinking shadow-2xl shadow-cyan-500/20">
-                <div className="w-3 h-3 bg-cyan-500 rounded-full animate-ping"></div>
-             </div>
-             <p className="text-[10px] tracking-[2em] font-black text-white uppercase text-center pl-[2em]">Neural handshake ready</p>
+          <div className="h-full flex flex-col items-center justify-center space-y-4 opacity-20">
+            <div className="w-16 h-16 rounded-full border border-cyan-500/20 flex items-center justify-center animate-pulse">
+              <div className="w-2 h-2 bg-cyan-500 rounded-full glow-cyan"></div>
+            </div>
+            <p className="text-[10px] tracking-[2em] font-black text-white uppercase text-center">Neural Sync Ready</p>
           </div>
         )}
         
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4`}>
-            <div className={`p-6 rounded-[24px] max-w-[95%] shadow-2xl ${m.role === 'user' ? 'chat-user text-black' : 'glass chat-ai text-zinc-100'}`}>
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-5`}>
+            <div className={`p-6 rounded-[28px] max-w-[90%] shadow-2xl transition-all duration-300 ${m.role === 'user' ? 'chat-user glow-purple text-zinc-900 font-bold' : 'glass chat-ai text-zinc-100 border-white/10'}`}>
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]} 
                 className="prose prose-invert max-w-none text-sm md:text-base leading-relaxed"
@@ -93,7 +92,7 @@ export default function PrometheusCosmicUI() {
                   code({ node, inline, className, children, ...props }: any) {
                     const match = /language-(\w+)/.exec(className || '');
                     return !inline && match ? (
-                      <div className="my-6 rounded-xl overflow-hidden border border-white/5">
+                      <div className="my-6 rounded-xl overflow-hidden border border-white/5 shadow-2xl">
                         <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>{String(children).replace(/\n$/, '')}</SyntaxHighlighter>
                       </div>
                     ) : (
@@ -107,22 +106,22 @@ export default function PrometheusCosmicUI() {
             </div>
           </div>
         ))}
-        {loading && <div className="ai-thinking text-[10px] text-cyan-500 font-black tracking-widest px-4 uppercase animate-pulse">Syncing...</div>}
+        {loading && <div className="text-cyan-500 animate-pulse text-[10px] font-black uppercase tracking-widest px-4">Processing Command...</div>}
       </div>
 
-      {/* 3. CENTERED BOTTOM SEARCH BAR (Absolute over main container) */}
-      <footer className="absolute bottom-10 left-0 right-0 z-20 flex justify-center px-4">
-        <div className="w-full max-w-3xl glass relative flex items-center p-2 rounded-[32px] border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_0_50px_rgba(0,0,0,0.6)] focus-within:border-cyan-500/50 transition-all duration-500">
+      {/* 3. 🔥 WORLD CLASS CENTERED BOTTOM SEARCH BAR */}
+      <footer className="w-full h-32 flex items-center justify-center px-4 md:px-12 z-50 bg-gradient-to-t from-[#020617] to-transparent">
+        <div className="w-full max-w-3xl glass-strong flex items-center p-2 rounded-[32px] border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] focus-within:ring-2 focus-within:ring-cyan-500/30 transition-all duration-500">
           <input 
             value={input} 
             onKeyDown={(e) => e.key === 'Enter' && handleSend()} 
             onChange={(e) => setInput(e.target.value)} 
-            className="flex-1 bg-transparent px-8 py-5 outline-none text-white text-lg placeholder:text-zinc-700" 
-            placeholder="Inject command to Prometheus..." 
+            className="flex-1 bg-transparent px-8 py-5 outline-none text-white text-lg placeholder:text-zinc-600" 
+            placeholder="Describe your vision or issue command..." 
           />
           <button 
             onClick={handleSend} 
-            className="bg-white text-black px-10 py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-cyan-400 hover:scale-105 active:scale-95 transition-all shadow-xl"
+            className="bg-white text-black px-12 py-4 rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-cyan-400 hover:scale-105 active:scale-95 transition-all shadow-xl"
           >
             Execute
           </button>
