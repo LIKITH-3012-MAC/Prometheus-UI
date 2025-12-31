@@ -1,227 +1,220 @@
-/* =========================================================
-   🌈 PROMETHEUS AI — VIBGYOR • AMINO • PERLA CSS SYSTEM
-   ========================================================= */
-
-/* -------------------------
-   TAILWIND BASE
--------------------------- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* -------------------------
-   🌈 ROOT COLOR UNIVERSE
--------------------------- */
-:root {
-  --void: #020617;
-  --nebula: #0a0a2e;
-  --glass: rgba(255,255,255,0.04);
-  --border-soft: rgba(255,255,255,0.08);
-  --border-neon: rgba(0,246,255,0.22);
+/* =========================================================
+   🌈 PROMETHEUS ULTRA :: VIBGYOR COSMIC DESIGN SYSTEM
+========================================================= */
 
-  /* VIBGYOR CORE */
+/* ---------- ROOT TOKENS ---------- */
+:root {
+  --bg-deep: #020617;
+  --bg-void: #00010a;
+
+  --glass-light: rgba(255,255,255,0.04);
+  --glass-strong: rgba(255,255,255,0.08);
+
+  --border-soft: rgba(255,255,255,0.12);
+  --border-neon: rgba(0,246,255,0.4);
+
+  --cyan: #00f6ff;
+  --purple: #a855f7;
+  --pink: #ec4899;
   --violet: #8b5cf6;
   --indigo: #6366f1;
   --blue: #3b82f6;
   --green: #22c55e;
-  --yellow: #eab308;
-  --orange: #f97316;
+  --yellow: #facc15;
+  --orange: #fb923c;
   --red: #ef4444;
 
-  /* AMINO / PERLA */
-  --cyan: #00f6ff;
-  --pink: #ec4899;
-  --purple: #a855f7;
-  --mint: #2dd4bf;
-
-  /* RADII */
-  --r-xs: 6px;
-  --r-sm: 10px;
-  --r-md: 16px;
-  --r-lg: 24px;
-  --r-xl: 32px;
-
-  /* SHADOW INTENSITY */
-  --glow-soft: 0 0 12px;
-  --glow-strong: 0 0 32px;
+  --glow-cyan: 0 0 40px rgba(0,246,255,0.6);
+  --glow-purple: 0 0 40px rgba(168,85,247,0.6);
 }
 
-/* -------------------------
-   🌌 BODY COSMOS
--------------------------- */
+/* ---------- GLOBAL ---------- */
+* {
+  box-sizing: border-box;
+}
+
 body {
   background:
-    radial-gradient(circle at top right, #0a0a2e, #020617),
-    radial-gradient(circle at bottom left, #030b3a, #000);
-  color: white;
+    radial-gradient(circle at 10% 20%, rgba(0,246,255,0.12), transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(168,85,247,0.18), transparent 55%),
+    linear-gradient(180deg, #030712, #020617);
+  color: #f8fafc;
   font-family: 'Inter', system-ui, sans-serif;
-  overflow: hidden;
   height: 100vh;
+  overflow: hidden;
 }
 
-/* -------------------------
-   🧊 GLASSMORPHISM
--------------------------- */
+/* ---------- GLASS SYSTEM ---------- */
 .glass {
-  background: var(--glass);
-  backdrop-filter: blur(22px) saturate(180%);
+  background: var(--glass-light);
+  backdrop-filter: blur(18px) saturate(160%);
   border: 1px solid var(--border-soft);
-  border-radius: var(--r-md);
 }
 
 .glass-strong {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(28px) saturate(200%);
+  background: var(--glass-strong);
+  backdrop-filter: blur(26px) saturate(180%);
   border: 1px solid var(--border-neon);
 }
 
-/* -------------------------
-   ✨ TEXT GRADIENTS
--------------------------- */
+/* ---------- TEXT ---------- */
 .text-gradient {
-  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  background: linear-gradient(90deg,
+    var(--cyan),
+    var(--purple),
+    var(--pink)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-vibgyor {
-  background: linear-gradient(
-    90deg,
-    var(--violet),
-    var(--indigo),
-    var(--blue),
-    var(--green),
-    var(--yellow),
+  background: linear-gradient(90deg,
+    var(--red),
     var(--orange),
-    var(--red)
+    var(--yellow),
+    var(--green),
+    var(--blue),
+    var(--indigo),
+    var(--violet)
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* -------------------------
-   🚀 BUTTONS
--------------------------- */
+/* ---------- BUTTONS ---------- */
 .btn {
-  padding: 10px 18px;
-  border-radius: var(--r-sm);
-  font-weight: 500;
-  transition: all .25s ease;
+  padding: 0.9rem 1.6rem;
+  border-radius: 999px;
+  font-weight: 800;
+  transition: all 0.35s ease;
 }
 
 .btn-neon {
   background: linear-gradient(135deg, var(--cyan), var(--purple));
-  box-shadow: var(--glow-soft) rgba(0,246,255,.4);
+  box-shadow: var(--glow-cyan);
 }
 
 .btn-neon:hover {
-  box-shadow: var(--glow-strong) rgba(0,246,255,.7);
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    0 0 20px rgba(0,246,255,0.6),
+    0 0 50px rgba(168,85,247,0.6);
 }
 
-/* -------------------------
-   💬 CHAT BUBBLES
--------------------------- */
-.chat-ai {
-  background: linear-gradient(
-    135deg,
-    rgba(0,246,255,.12),
-    rgba(168,85,247,.12)
-  );
-  border-left: 3px solid var(--cyan);
-}
-
+/* ---------- CHAT BUBBLES ---------- */
 .chat-user {
+  background: linear-gradient(135deg,
+    rgba(168,85,247,0.35),
+    rgba(236,72,153,0.25)
+  );
+  border: 1px solid rgba(168,85,247,0.6);
+  box-shadow: var(--glow-purple);
+}
+
+.chat-ai {
+  background: linear-gradient(135deg,
+    rgba(0,246,255,0.12),
+    rgba(99,102,241,0.12)
+  );
+  border: 1px solid rgba(0,246,255,0.4);
+}
+
+/* ---------- INPUT CORE ---------- */
+input {
+  color: white;
+  caret-color: var(--cyan);
+}
+
+input::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+
+input:focus {
+  text-shadow: 0 0 6px rgba(0,246,255,0.5);
+}
+
+/* ---------- AI THINKING ---------- */
+.ai-thinking {
+  position: relative;
+}
+
+.ai-thinking::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  background: conic-gradient(
+    var(--cyan),
+    var(--purple),
+    var(--pink),
+    var(--cyan)
+  );
+  filter: blur(18px);
+  opacity: 0.4;
+  animation: spin 6s linear infinite;
+  z-index: -1;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- GLOW HELPERS ---------- */
+.glow-cyan {
+  box-shadow: var(--glow-cyan);
+}
+
+.glow-purple {
+  box-shadow: var(--glow-purple);
+}
+
+/* ---------- SCROLLBAR ---------- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
   background: linear-gradient(
-    135deg,
     var(--cyan),
     var(--purple)
   );
-}
-
-/* -------------------------
-   🧠 AI THINKING
--------------------------- */
-@keyframes ai-pulse {
-  0% { opacity: .25; transform: scale(.96); }
-  50% { opacity: 1; transform: scale(1); }
-  100% { opacity: .25; transform: scale(.96); }
-}
-
-.ai-thinking {
-  animation: ai-pulse 1.4s infinite ease-in-out;
-}
-
-/* -------------------------
-   🌊 GLOW UTILITIES
--------------------------- */
-.glow-cyan { box-shadow: 0 0 20px rgba(0,246,255,.6); }
-.glow-purple { box-shadow: 0 0 20px rgba(168,85,247,.6); }
-.glow-pink { box-shadow: 0 0 20px rgba(236,72,153,.6); }
-.glow-green { box-shadow: 0 0 20px rgba(34,197,94,.6); }
-
-/* -------------------------
-   🎛 SCROLLBARS
--------------------------- */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(var(--cyan), var(--purple));
   border-radius: 10px;
 }
 
-/* -------------------------
-   🌈 VIBGYOR BACKGROUNDS
--------------------------- */
-.bg-violet { background: var(--violet); }
-.bg-indigo { background: var(--indigo); }
-.bg-blue { background: var(--blue); }
-.bg-green { background: var(--green); }
-.bg-yellow { background: var(--yellow); }
-.bg-orange { background: var(--orange); }
-.bg-red { background: var(--red); }
-
-/* -------------------------
-   ✨ HOVER MAGIC
--------------------------- */
-.hover-float:hover {
-  transform: translateY(-4px);
-  transition: transform .25s ease;
-}
-
+/* ---------- HOVER FX ---------- */
 .hover-glow:hover {
-  box-shadow: 0 0 40px rgba(255,255,255,.15);
+  box-shadow:
+    0 0 15px rgba(0,246,255,0.5),
+    0 0 40px rgba(168,85,247,0.4);
 }
 
-/* -------------------------
-   📱 RESPONSIVE TUNING
--------------------------- */
-@media (max-width: 768px) {
-  .glass {
-    border-radius: var(--r-sm);
-  }
+/* ---------- GRID SCANLINES ---------- */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(
+      transparent 95%,
+      rgba(255,255,255,0.03)
+    );
+  background-size: 100% 4px;
+  pointer-events: none;
+  opacity: 0.2;
 }
 
-/* -------------------------
-   🌌 AMINO PERLA EFFECT
--------------------------- */
-@keyframes perla-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+/* ---------- FUTURE PLACEHOLDERS ---------- */
+/* WebGL canvas */
+/* Voice waveform */
+/* Reactor core */
+/* Theme switcher */
+/* Neural nodes */
+/* Quantum particles */
 
-.perla {
-  background: linear-gradient(
-    270deg,
-    var(--cyan),
-    var(--pink),
-    var(--purple),
-    var(--mint)
-  );
-  background-size: 600% 600%;
-  animation: perla-flow 10s ease infinite;
-}
-
-/* -------------------------
-   🔥 END OF SYSTEM
--------------------------- */
+/* =========================================================
+   🚀 END :: PROMETHEUS ULTRA VIBGYOR
+========================================================= */

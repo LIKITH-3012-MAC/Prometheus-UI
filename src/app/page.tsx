@@ -1,146 +1,119 @@
 "use client";
-
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Mic, MicOff, Send, Cpu, Zap, Command } from "lucide-react";
 
-/* =========================================================
-   🧠 PROMETHEUS :: COSMIC NEURAL INTERFACE
-   Author: Likith Naidu
-========================================================= */
-
-export default function PrometheusVibgyor() {
+export default function PrometheusULTRA() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [listening, setListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  /* 🔽 AUTO SCROLL */
   useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messages, loading]);
+    if (scrollRef.current)
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages]);
 
-  /* 🧬 TYPEWRITER EFFECT */
   const typeMessage = (text: string) => {
     let i = 0;
-    setMessages(prev => [...prev, { role: "assistant", content: "" }]);
-
+    setMessages(p => [...p, { role: "assistant", content: "" }]);
     const interval = setInterval(() => {
-      setMessages(prev => {
-        const updated = [...prev];
-        updated[updated.length - 1].content = text.slice(0, i + 1);
-        return updated;
+      setMessages(p => {
+        const u = [...p];
+        u[u.length - 1].content = text.slice(0, i + 1);
+        return u;
       });
       i++;
       if (i >= text.length) clearInterval(interval);
-    }, 8);
+    }, 7);
   };
 
-  /* 🚀 SEND MESSAGE */
   const handleSend = async () => {
-    if (!input.trim() || loading) return;
-
+    if (!input || loading) return;
     const userMsg = { role: "user", content: input };
-    setMessages(prev => [...prev, userMsg]);
+    setMessages(p => [...p, userMsg]);
     setInput("");
     setLoading(true);
-
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
-
       const data = await res.json();
       typeMessage(data.content);
-    } catch {
-      typeMessage("⚠️ Neural link unstable. Retry command.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="relative h-screen w-full overflow-hidden">
+    <main className="h-screen flex flex-col relative overflow-hidden">
 
-      {/* 🌌 BACKGROUND FX */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(0,246,255,0.15),transparent_60%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(168,85,247,0.18),transparent_60%)]"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(transparent_95%,rgba(255,255,255,0.02))] bg-[length:100%_4px]"></div>
-      </div>
+      {/* ===== FLOATING AI CORE ===== */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                      w-40 h-40 rounded-full ai-thinking opacity-30 pointer-events-none" />
 
-      {/* 🧭 HEADER HUD */}
-      <header className="flex justify-between items-center px-6 py-6 z-10">
+      {/* ===== TOP HUD ===== */}
+      <header className="flex justify-between items-center px-6 py-4 z-10">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-gradient uppercase">
-            PROMETHEUS
+          <h1 className="text-3xl font-black text-gradient uppercase">
+            Prometheus
           </h1>
-          <p className="text-[10px] tracking-[0.5em] font-bold text-cyan-400 opacity-60">
-            NEURAL INTERFACE • LIKITH NAIDU
+          <p className="text-[10px] tracking-[0.4em] text-cyan-400 opacity-60">
+            ULTRA NEURAL OS
           </p>
         </div>
 
-        <div className="glass px-4 py-2 text-[10px] font-black tracking-widest text-cyan-400 animate-pulse">
-          SYSTEM ONLINE
+        <div className="flex gap-3">
+          <div className="glass px-3 py-2 text-[10px] text-cyan-400 flex gap-2">
+            <Cpu size={12}/> CPU 99%
+          </div>
+          <div className="glass px-3 py-2 text-[10px] text-purple-400 flex gap-2">
+            <Zap size={12}/> LATENCY 12ms
+          </div>
+          <div className="glass px-3 py-2 text-[10px] text-pink-400 flex gap-2">
+            <Command size={12}/> ⌘ + Enter
+          </div>
         </div>
       </header>
 
-      {/* 🧠 CHAT STREAM */}
-      <section
+      {/* ===== CHAT STREAM ===== */}
+      <div
         ref={scrollRef}
-        className="relative flex-1 overflow-y-auto px-4 md:px-[18%] space-y-10 pb-40"
+        className="flex-1 overflow-y-auto px-6 md:px-[22%] space-y-8 pb-44"
       >
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center gap-6 opacity-80">
-            <div className="w-20 h-20 rounded-full border border-cyan-500/30 flex items-center justify-center ai-thinking glow-cyan">
-              <div className="w-4 h-4 bg-cyan-500 rounded-full"></div>
+          <div className="h-full flex flex-col items-center justify-center space-y-6">
+            <div className="w-24 h-24 rounded-full glass-strong ai-thinking flex items-center justify-center">
+              <div className="w-5 h-5 rounded-full bg-cyan-400 glow-cyan"></div>
             </div>
-            <p className="text-[10px] tracking-[2.5em] font-black text-white/20 uppercase">
-              Awaiting Neural Command
+            <p className="text-[11px] tracking-[0.4em] text-white/30 uppercase">
+              Awaiting Ultra Command
             </p>
           </div>
         )}
 
         {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`flex ${
-              m.role === "user" ? "justify-end" : "justify-start"
-            } animate-in fade-in slide-in-from-bottom-4`}
-          >
-            <div
-              className={`p-6 rounded-[28px] max-w-[96%] ${
-                m.role === "user"
-                  ? "chat-user glow-purple"
-                  : "glass chat-ai"
-              }`}
-            >
+          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div className={`p-6 rounded-[26px] max-w-[90%]
+              ${m.role === "user" ? "chat-user" : "glass chat-ai"}`}>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-                className="prose prose-invert max-w-none text-sm md:text-base leading-relaxed"
+                className="prose prose-invert max-w-none"
                 components={{
-                  code({ inline, className, children, ...props }: any) {
+                  code({ inline, className, children }: any) {
                     const match = /language-(\w+)/.exec(className || "");
                     return !inline && match ? (
-                      <div className="my-6 rounded-xl overflow-hidden border border-white/10 shadow-2xl">
-                        <SyntaxHighlighter
-                          style={atomDark}
-                          language={match[1]}
-                          PreTag="div"
-                          {...props}
-                        >
-                          {String(children).replace(/\n$/, "")}
-                        </SyntaxHighlighter>
-                      </div>
+                      <SyntaxHighlighter style={atomDark} language={match[1]}>
+                        {String(children)}
+                      </SyntaxHighlighter>
                     ) : (
-                      <code className="bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded font-mono">
+                      <code className="bg-cyan-500/20 text-cyan-300 px-1 rounded">
                         {children}
                       </code>
                     );
@@ -154,27 +127,59 @@ export default function PrometheusVibgyor() {
         ))}
 
         {loading && (
-          <div className="ai-thinking text-[10px] text-cyan-500 font-black tracking-[0.4em]">
-            SYNCING NEURAL NETWORK…
+          <div className="text-[10px] tracking-widest text-cyan-400">
+            STREAMING TOKENS ▓▓▓▓▓▒▒▒
           </div>
         )}
-      </section>
+      </div>
 
-      {/* 🧪 INPUT CORE */}
-      <footer className="absolute bottom-8 left-0 right-0 px-4 md:px-[18%] z-20">
-        <div className="glass-strong relative flex items-center rounded-[40px] p-2 hover-glow transition-all duration-500">
+      {/* ===== BOTTOM COMMAND CONSOLE ===== */}
+      <footer className="fixed bottom-6 left-0 right-0 px-6 md:px-[22%] z-20">
+        <div className="glass-strong flex items-center gap-3 px-4 py-3 rounded-full hover-glow">
+
+          {/* MIC */}
+          <button
+            onClick={() => setListening(!listening)}
+            className={`w-12 h-12 rounded-full flex items-center justify-center
+              ${listening
+                ? "bg-red-500 animate-pulse"
+                : "bg-gradient-to-br from-cyan-400 to-purple-500"}
+              hover:scale-110 transition`}
+          >
+            {listening ? <MicOff size={20} className="text-black"/> :
+                         <Mic size={20} className="text-black"/>}
+          </button>
+
+          {/* WAVEFORM */}
+          {listening && (
+            <div className="flex gap-1 items-center">
+              {[...Array(6)].map((_, i) => (
+                <span key={i}
+                  className="w-1 h-6 bg-cyan-400 animate-pulse rounded"
+                  style={{ animationDelay: `${i * 0.1}s` }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* INPUT */}
           <input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Describe your vision or issue a command…"
-            className="flex-1 bg-transparent px-8 py-6 outline-none text-white text-lg placeholder:text-white/25"
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleSend()}
+            placeholder="Speak or type an ULTRA command…"
+            className="flex-1 bg-transparent px-6 py-4 text-white
+                       placeholder:text-white/30 outline-none text-lg"
           />
+
+          {/* SEND */}
           <button
             onClick={handleSend}
-            className="btn btn-neon text-black text-xs uppercase tracking-widest mr-2"
+            className="w-12 h-12 rounded-full flex items-center justify-center
+                       bg-gradient-to-br from-purple-500 to-pink-500
+                       hover:scale-110 transition"
           >
-            Execute
+            <Send size={18} className="text-black"/>
           </button>
         </div>
       </footer>
