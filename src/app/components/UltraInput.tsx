@@ -1,89 +1,72 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import { Send, Mic } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Mic, Send } from "lucide-react";
 
-// ---------- TTS/STT ----------
+interface Props {
+  onSend: (text: string) => void;
+}
+
 export function useSpeech() {
-  const [speaking, setSpeaking] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [speechText, setSpeechText] = useState("");
+  const recognitionRef = React.useRef<SpeechRecognition | null>(null);
 
-  const speak = (text: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    speechSynthesis.speak(utterance);
-  };
-
-  const listen = (onResult: (text: string) => void) => {
+  useEffect(() => {
     if (!("webkitSpeechRecognition" in window)) return;
-    const recognition = new (window as any).webkitSpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognition.start();
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      onResult(transcript);
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = true;
+    recognition.onresult = (e: any) => {
+      setSpeechText(e.results[0][0].transcript);
     };
-    recognition.onend = () => setSpeaking(false);
+    recognitionRef.current = recognition;
+  }, []);
+
+  const startListening = () => {
+    recognitionRef.current?.start();
+    setListening(true);
   };
-
-  return { speak, listen, speaking, setSpeaking };
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+    setListening(false);
+  };
+  return { listening, speechText, startListening, stopListening };
 }
 
-// ---------- ULTRA INPUT ----------
-interface UltraInputProps {
-  onSend: (msg: string) => void;
-}
-
-export default function UltraInput({ onSend }: UltraInputProps) {
+export default function UltraInput({ onSend }: Props) {
   const [input, setInput] = useState("");
-  const { speak, listen, speaking, setSpeaking } = useSpeech();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { listening, speechText, startListening, stopListening } = useSpeech();
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    onSend(input);
-    speak(input); // TTS
-    setInput("");
-  };
-
-  const handleMic = () => {
-    if (speaking) return;
-    setSpeaking(true);
-    listen((text) => {
-      setInput(text);
-      setSpeaking(false);
-      onSend(text);
-      speak(text);
-    });
-  };
+  useEffect(() => {
+    if (listening) setInput(speechText);
+  }, [speechText, listening]);
 
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-4 z-50">
-      <div className="flex items-center bg-white/5 border border-white/20 backdrop-blur-lg rounded-full px-4 py-3 shadow-xl hover:shadow-cyan-400/40 transition-all">
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && handleSend()}
-          placeholder="Type or speak an ULTRA command..."
-          className="flex-1 bg-transparent text-white placeholder:text-white/30 outline-none px-4 py-2 text-lg"
-        />
-        <button
-          onClick={handleMic}
-          className={`w-12 h-12 rounded-full flex items-center justify-center
-                      ${speaking ? 'bg-cyan-500 animate-pulse' : 'bg-gradient-to-br from-purple-500 to-pink-500'}
-                      hover:scale-110 transition-all mr-2`}
-        >
-          <Mic size={20} className="text-black"/>
-        </button>
-        <button
-          onClick={handleSend}
-          className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-cyan-500 to-purple-500 hover:scale-110 transition"
-        >
-          <Send size={20} className="text-black"/>
-        </button>
-      </div>
+    <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] md:w-[60%] flex items-center glass-strong rounded-full px-4 py-3 shadow-xl">
+      {/* Mic */}
+      <button
+        onClick={listening ? stopListening : startListening}
+        className={`mr-3 p-3 rounded-full ${listening ? "bg-red-500 animate-pulse" : "bg-cyan-500"}`}
+      >
+        <Mic size={20} className="text-white"/>
+      </button>
+
+      {/* Input */}
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && (onSend(input), setInput(""))}
+        placeholder="Speak or type an ULTRA command..."
+        className="flex-1 bg-transparent outline-none text-white placeholder:text-white/30 text-lg"
+      />
+
+      {/* Send */}
+      <button
+        onClick={() => { onSend(input); setInput(""); }}
+        className="ml-3 p-3 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 hover:scale-110 transition-transform"
+      >
+        <Send size={18} className="text-black"/>
+      </button>
     </div>
   );
 }
