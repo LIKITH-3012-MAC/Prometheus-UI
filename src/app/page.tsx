@@ -1,7 +1,11 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-export default function PrometheusYesterday() {
+export default function PrometheusCosmicUI() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,40 +31,69 @@ export default function PrometheusYesterday() {
       const data = await res.json();
       setMessages(prev => [...prev, { role: "assistant", content: data.content }]);
     } catch (err) {
-      setMessages(prev => [...prev, { role: "assistant", content: "Error: Neural Link Failed." }]);
+      setMessages(prev => [...prev, { role: "assistant", content: "Neural Link Error." }]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="h-screen bg-black text-white flex flex-col p-4 md:p-10 font-sans">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-cyan-500">PROMETHEUS RESTORED</h1>
-        <p className="text-xs opacity-50 font-mono">Architecture: Likith Naidu</p>
+    <main className="h-screen flex flex-col p-4 md:p-10 relative overflow-hidden">
+      <header className="flex justify-between items-center mb-8 px-4 z-10">
+        <div className="flex flex-col">
+          <h1 className="text-3xl font-black tracking-tighter text-gradient uppercase">Prometheus</h1>
+          <p className="text-[10px] tracking-[0.4em] font-bold text-cyan-400 opacity-70">NEURAL LINK • LIKITH NAIDU</p>
+        </div>
+        <div className="glass px-4 py-2 text-[10px] font-bold text-cyan-400 animate-pulse">SYSTEM: ONLINE</div>
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-6 mb-20 px-2">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-[20%] space-y-8 scroll-smooth pb-32">
+        {messages.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center space-y-4 pt-20">
+             <div className="w-12 h-12 rounded-full border border-cyan-500/30 flex items-center justify-center ai-thinking shadow-2xl">
+                <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
+             </div>
+             <p className="text-[10px] tracking-[2em] font-black text-white/20 uppercase">Awaiting Command</p>
+          </div>
+        )}
+        
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-4 rounded-xl ${m.role === 'user' ? 'bg-zinc-800' : 'bg-cyan-900/20 border border-cyan-500/20'}`}>
-              <p className="text-sm leading-relaxed">{m.content}</p>
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-3`}>
+            <div className={`p-6 rounded-[24px] max-w-[95%] ${m.role === 'user' ? 'chat-user' : 'glass chat-ai text-zinc-100'}`}>
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]} 
+                className="prose prose-invert max-w-none text-sm md:text-base leading-relaxed"
+                components={{
+                  code({ node, inline, className, children, ...props }: any) {
+                    const match = /language-(\w+)/.exec(className || '');
+                    return !inline && match ? (
+                      <div className="my-6 rounded-xl overflow-hidden border border-white/5 shadow-2xl">
+                        <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>{String(children).replace(/\n$/, '')}</SyntaxHighlighter>
+                      </div>
+                    ) : (
+                      <code className="bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded font-mono" {...props}>{children}</code>
+                    );
+                  }
+                }}
+              >
+                {m.content}
+              </ReactMarkdown>
             </div>
           </div>
         ))}
-        {loading && <div className="text-cyan-500 animate-pulse text-xs">Thinking...</div>}
+        {loading && <div className="ai-thinking text-[10px] text-cyan-500 font-black tracking-widest px-4">SYNCHRONIZING...</div>}
       </div>
 
-      <footer className="fixed bottom-10 left-0 right-0 px-4 md:px-10">
-        <div className="max-w-4xl mx-auto flex gap-4">
+      <footer className="absolute bottom-10 left-0 right-0 px-4 md:px-[20%] z-20">
+        <div className="glass relative flex items-center p-2 rounded-[32px] border-white/10 bg-white/5 backdrop-blur-3xl transition-all duration-500 group">
           <input 
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Type your command..."
-            className="flex-1 bg-zinc-900 border border-white/10 rounded-lg px-6 py-4 outline-none focus:border-cyan-500 transition-all"
+            value={input} 
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()} 
+            onChange={(e) => setInput(e.target.value)} 
+            className="flex-1 bg-transparent px-8 py-5 outline-none text-white text-lg placeholder:text-white/20" 
+            placeholder="Issue an ULTRA command..." 
           />
-          <button onClick={handleSend} className="bg-white text-black px-8 py-4 rounded-lg font-bold hover:bg-cyan-500 transition-all">Send</button>
+          <button onClick={handleSend} className="bg-white text-black px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-cyan-400 transition-all">Execute</button>
         </div>
       </footer>
     </main>

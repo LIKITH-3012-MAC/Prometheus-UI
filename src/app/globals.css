@@ -2,204 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
-/* =========================================================
-   🌈 PROMETHEUS ULTRA :: VIBGYOR COSMIC DESIGN SYSTEM
-========================================================= */
-
-/* ---------- ROOT TOKENS ---------- */
 :root {
-  --bg-deep: #020617;
-  --bg-void: #00010a;
-
-  --glass-light: rgba(255,255,255,0.04);
-  --glass-strong: rgba(255,255,255,0.08);
-
-  --border-soft: rgba(255,255,255,0.12);
-  --border-neon: rgba(0,246,255,0.4);
-
-  --cyan: #00f6ff;
-  --purple: #a855f7;
-  --pink: #ec4899;
+  --void: #020617;
+  --nebula: #0a0a2e;
+  --glass: rgba(255,255,255,0.04);
+  --border-soft: rgba(255,255,255,0.08);
+  --border-neon: rgba(0,246,255,0.22);
   --violet: #8b5cf6;
   --indigo: #6366f1;
   --blue: #3b82f6;
   --green: #22c55e;
-  --yellow: #facc15;
-  --orange: #fb923c;
+  --yellow: #eab308;
+  --orange: #f97316;
   --red: #ef4444;
-
-  --glow-cyan: 0 0 40px rgba(0,246,255,0.6);
-  --glow-purple: 0 0 40px rgba(168,85,247,0.6);
-  --glow-pink: 0 0 40px rgba(236,72,153,0.6);
-}
-
-/* ---------- GLOBAL ---------- */
-* {
-  box-sizing: border-box;
+  --cyan: #00f6ff;
+  --purple: #a855f7;
+  --mint: #2dd4bf;
+  --r-md: 16px;
 }
 
 body {
-  background: radial-gradient(circle at 10% 20%, rgba(0,246,255,0.12), rgba(168,85,247,0.18)) , linear-gradient(180deg, #030712, #020617);
-  color: #f8fafc;
+  background: radial-gradient(circle at top right, #0a0a2e, #020617), radial-gradient(circle at bottom left, #030b3a, #000);
+  color: white;
   font-family: 'Inter', system-ui, sans-serif;
-  height: 100vh;
   overflow: hidden;
-  position: relative;
+  height: 100vh;
 }
 
-/* ---------- GLASS SYSTEM ---------- */
 .glass {
-  background: var(--glass-light);
-  backdrop-filter: blur(18px) saturate(160%);
+  background: var(--glass);
+  backdrop-filter: blur(22px) saturate(180%);
   border: 1px solid var(--border-soft);
-  border-radius: 1.5rem;
+  border-radius: var(--r-md);
 }
 
-.glass-strong {
-  background: var(--glass-strong);
-  backdrop-filter: blur(26px) saturate(180%);
-  border: 1px solid var(--border-neon);
-  border-radius: 2rem;
-}
-
-/* ---------- TEXT ---------- */
 .text-gradient {
-  background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.text-vibgyor {
-  background: linear-gradient(90deg, var(--red), var(--orange), var(--yellow), var(--green), var(--blue), var(--indigo), var(--violet));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* ---------- BUTTONS ---------- */
-.btn {
-  padding: 0.9rem 1.6rem;
-  border-radius: 999px;
-  font-weight: 800;
-  transition: all 0.35s ease;
-}
-
-.btn-neon {
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
-  box-shadow: var(--glow-cyan);
-}
-
-.btn-neon:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 0 20px rgba(0,246,255,0.6), 0 0 50px rgba(168,85,247,0.6);
-}
-
-/* ---------- CHAT BUBBLES ---------- */
-.chat-user {
-  background: linear-gradient(135deg, rgba(168,85,247,0.35), rgba(236,72,153,0.25));
-  border: 1px solid rgba(168,85,247,0.6);
-  box-shadow: var(--glow-purple);
 }
 
 .chat-ai {
-  background: linear-gradient(135deg, rgba(0,246,255,0.12), rgba(99,102,241,0.12));
-  border: 1px solid rgba(0,246,255,0.4);
+  background: linear-gradient(135deg, rgba(0,246,255,.12), rgba(168,85,247,.12));
+  border-left: 3px solid var(--cyan);
 }
 
-/* ---------- INPUT CORE ---------- */
-input {
-  color: white;
-  caret-color: var(--cyan);
+.chat-user {
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  color: black;
+  font-weight: 600;
 }
 
-input::placeholder {
-  color: rgba(255,255,255,0.3);
+@keyframes ai-pulse {
+  0% { opacity: .25; transform: scale(.96); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: .25; transform: scale(.96); }
 }
+.ai-thinking { animation: ai-pulse 1.4s infinite ease-in-out; }
 
-input:focus {
-  text-shadow: 0 0 6px rgba(0,246,255,0.35);
-}
-
-/* ---------- AI THINKING DOTS ---------- */
-.ai-thinking {
-  position: relative;
-}
-
-.ai-thinking::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 999px;
-  background: conic-gradient(var(--cyan), var(--purple), var(--pink), var(--cyan));
-  filter: blur(18px);
-  opacity: 0.4;
-  animation: spin 6s linear infinite;
-  z-index: -1;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ---------- SCROLLBAR ---------- */
-::-webkit-scrollbar {
-  width: 6px;
-}
+::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(var(--cyan), var(--purple));
   border-radius: 10px;
 }
-
-/* ---------- GLOW HELPERS ---------- */
-.glow-cyan { box-shadow: var(--glow-cyan);}
-.glow-purple { box-shadow: var(--glow-purple);}
-.glow-pink { box-shadow: var(--glow-pink);}
-
-/* ---------- PERLA FLOW (VIBGYOR ANIMATION) ---------- */
-@keyframes perla-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.perla {
-  background: linear-gradient(270deg, var(--cyan), var(--pink), var(--purple), var(--green), var(--yellow), var(--red));
-  background-size: 600% 600%;
-  animation: perla-flow 12s ease infinite;
-  border-radius: 1.5rem;
-}
-
-/* ---------- COSMIC GRID SCANLINES ---------- */
-body::after {
-  content: '';
-  position: absolute;
-  inset:0;
-  background: repeating-linear-gradient(
-    180deg,
-    transparent,
-    transparent 95%,
-    rgba(255,255,255,0.03) 95%,
-    rgba(255,255,255,0.03) 100%
-  );
-  pointer-events: none;
-  opacity: 0.2;
-  z-index: 1;
-}
-
-/* ---------- STARFIELD GLOW NODES ---------- */
-@keyframes pulse-node {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.6); opacity: 0.2; }
-}
-
-/* ---------- HOVER FX ---------- */
-.hover-glow:hover {
-  box-shadow: 0 0 15px rgba(0,246,255,0.5), 0 0 40px rgba(168,85,247,0.4);
-}
-
-/* ---------- FUTURE PLACEHOLDERS ---------- */
-/* WebGL canvas (Starfield + Orb + Nodes) */
-/* Voice waveform animations */
-/* Reactor core pulses */
-/* Theme switcher UI */
-/* Neural nodes & quantum particles */
-/* =========================================================
-   🚀 END :: PROMETHEUS ULTRA VIBGYOR COSMIC
-========================================================= */
