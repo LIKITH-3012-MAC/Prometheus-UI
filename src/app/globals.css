@@ -2,27 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================
+   🌑 PROMETHEUS CINEMATIC OS :: DESIGN TOKENS
+   ========================================================= */
 :root {
-  --neon-cyan: #00f3ff;
-  --neon-purple: #bc13fe;
-  --neon-pink: #ff00ff;
+  --obsidian: #02040a;
+  --nebula-glow: rgba(0, 246, 255, 0.15);
+  --ai-accent: #00f6ff;
+  --neural-violet: #a855f7;
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --motion-fast: 0.2s cubic-bezier(0.2, 0, 0, 1);
+  --motion-slow: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
-  background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
-  color: white;
-  min-height: 100vh;
-  overflow-x: hidden;
+  background-color: var(--obsidian);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow: hidden;
+  height: 100vh;
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* 🌌 CINEMATIC BACKGROUND */
+.cinematic-bg {
+  background: 
+    radial-gradient(circle at 50% -20%, var(--nebula-glow), transparent 40%),
+    radial-gradient(circle at 0% 100%, rgba(168, 85, 247, 0.08), transparent 30%),
+    var(--obsidian);
+  position: fixed;
+  inset: 0;
+  z-index: -2;
 }
 
-.text-vibrant {
-  background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* 🌫️ NOISE OVERLAY */
+.noise-texture {
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: -1;
 }
+
+/* 💎 SUPREME GLASSMORPHISM */
+.supreme-glass {
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(30px) saturate(150%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+}
+
+.chat-card-ai {
+  background: linear-gradient(135deg, rgba(0, 246, 255, 0.03), rgba(168, 85, 247, 0.03));
+  border-left: 2px solid var(--ai-accent);
+  box-shadow: inset 0 0 20px rgba(0, 246, 255, 0.02);
+}
+
+.chat-card-user {
+  background: linear-gradient(135deg, var(--ai-accent), var(--neural-violet));
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 10px 40px rgba(0, 246, 255, 0.2);
+}
+
+/* ✨ GLOW SWEEP ANIMATION */
+@keyframes sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.glow-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.glow-sweep::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  animation: sweep 3s infinite;
+}
+
+/* 🌀 AI THINKING PULSE */
+.thinking-orb {
+  width: 12px; height: 12px;
+  background: var(--ai-accent);
+  border-radius: 50%;
+  filter: blur(2px) drop-shadow(0 0 8px var(--ai-accent));
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
