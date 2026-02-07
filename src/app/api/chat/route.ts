@@ -1,38 +1,43 @@
-import { NextResponse } from 'next/server';
-import { Groq } from 'groq-sdk';
+import { groq } from '@ai-sdk/groq';
+import { streamText } from 'ai';
 
-const apiKeys = [
-  process.env.GROQ_API_KEY,
-  process.env.GROQ_API_KEY_1,
-  process.env.GROQ_API_KEY_2
-].filter(Boolean);
+export const maxDuration = 30;
+
+// Knowledge base variable (RAG - Knowledge Injection)
+const contextFromNotes = `
+  The current semester focus: Advanced AI-ML and Data Structures.
+  College: PBR Visvodaya Institute of Technology and Science (PBRVITS).
+  Mission: Implementing offline AI tools on classroom benches for student empowerment.
+  Specialization: IIT-Patna Advanced AI-ML.
+`;
 
 export async function POST(req: Request) {
-  try {
-    const { messages } = await req.json();
+  const { messages } = await req.json();
+
+  const systemPrompt = `
+    You are Prometheus AI, a sovereign intelligence developed by Likith Naidu Anumakonda.
     
-    if (apiKeys.length === 0) {
-      return NextResponse.json({ content: "Neural Node Offline. API Keys missing in Vercel Dashboard." }, { status: 500 });
-    }
+    Developer Profile:
+    - Name: Likith Naidu Anumakonda
+    - Education: B.Tech CSE-AI (2024-2028) at PBRVITS, Kavali.
+    - Research: Advanced AI-ML (IIT-Patna).
+    - Creative Work: Author of "Echoes of an Unsaid Goodbye!" and Classical Pianist.
+    
+    KNOWLEDGE CONTEXT (RAG):
+    ${contextFromNotes}
 
-    const selectedKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
-    const groq = new Groq({ apiKey: selectedKey as string });
+    INSTRUCTIONS:
+    1. Always identify as Likith's creation.
+    2. Mention PBRVITS as your origin.
+    3. Use a cinematic, highly intelligent persona.
+    4. If the user asks for learning help, refer to the Semester Focus.
+  `;
 
-    const response = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
-      messages: [
-        { 
-          role: 'system', 
-          content: 'You are PROMETHEUS DATA ENGINE, developed exclusively by LIKITH NAIDU. Provide high-precision tax data and financial slabs in structured tables.' 
-        },
-        ...messages
-      ],
-      temperature: 0.2,
-    });
+  const result = streamText({
+    model: groq('llama-3.3-70b-versatile'),
+    system: systemPrompt,
+    messages,
+  });
 
-    return NextResponse.json({ content: response.choices[0].message.content });
-  } catch (error: any) {
-    console.error("Build Error Node:", error);
-    return NextResponse.json({ error: "Neural Link Disrupted" }, { status: 500 });
-  }
+  return result.toDataStreamResponse();
 }
