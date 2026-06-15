@@ -38,7 +38,7 @@ export default defineComponent({
       const foci: Record<string, string> = {
         general: "Sovereign Operations Engine",
         dsa: "Algorithm Complexity Optimization",
-        aiml: "Neural Weight Adjustment (IIT-Patna)",
+        aiml: "Neural Weight Adjustment",
         fullstack: "Web Scalability & REST Engineering",
         sql: "Query Processing & Tuning",
         linux: "Infrastructure & Containerization",

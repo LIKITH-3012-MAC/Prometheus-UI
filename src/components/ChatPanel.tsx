@@ -29,7 +29,7 @@ export default defineComponent({
     });
 
     const starterPrompts = [
-      { title: "AI/ML (IIT-Patna Focus)", query: "Explain neural network weights backpropagation in simple Telish with a dry run.", icon: Cpu },
+      { title: "AI/ML Engineering", query: "Explain neural network weights backpropagation in simple terms with a dry run.", icon: Cpu },
       { title: "DSA Strategy", query: "Intuition of finding cycle in a linked list. What is the optimal approach and complexity?", icon: Code2 },
       { title: "Linux & DevOps", query: "Write a bash script template to audit server load and send automated docker logs.", icon: Terminal },
       { title: "Spring Boot & React", query: "Design REST API guidelines for a secure student placement dashboard.", icon: ShieldAlert },
@@ -55,7 +55,7 @@ export default defineComponent({
                 Prometheus OS Core
               </h2>
               <p className="text-xs text-zinc-500 tracking-[0.2em] font-bold uppercase font-orbitron">
-                Sovereign Assistant Node • Created by L.Naidu
+                Sovereign Assistant Node • Prometheus Core
               </p>
               <p className="max-w-md mx-auto text-xs md:text-sm text-zinc-400 font-mono-tech leading-relaxed px-4">
                 Welcome to the AI classroom command center. Focus: Advanced AI-ML, DSA algorithms, full stack, DevOps, and placements.

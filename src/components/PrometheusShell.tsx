@@ -834,9 +834,9 @@ export default defineComponent({
 
       let content = `# PROMETHEUS OS - SESSION TRANSCRIPT\n`;
       content += `Date: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}\n`;
-      content += `Developer: Likith Naidu Anumakonda\n`;
+      content += `Developer: Prometheus Core Team\n`;
       content += `Owner: ${userName.value || "Commander"}\n`;
-      content += `Origin: PBRVITS (IIT-Patna AI-ML Focus)\n`;
+      content += `Origin: Local sovereign workspace\n`;
       content += `=========================================================\n\n`;
 
       activeSess.messages.forEach((m: any) => {

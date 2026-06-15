@@ -156,7 +156,7 @@ export default defineComponent({
 
         </div>
         <div className="text-[7.5px] text-center text-zinc-700 tracking-[0.4em] font-black uppercase select-none mt-1 font-orbitron">
-          Prometheus Command Node Synced • L.Naidu Systems
+          Prometheus Command Node Synced • Core Systems
         </div>
       </div>
     );

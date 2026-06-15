@@ -20,7 +20,7 @@ export default defineComponent({
         ]
       },
       {
-        subject: "Advanced AI-ML (IIT-Patna Focus)",
+        subject: "Advanced AI-ML Engineering",
         progress: 42,
         tasks: [
           { name: "Backpropagation weights derivation math", done: true },
