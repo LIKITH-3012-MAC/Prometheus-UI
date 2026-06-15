@@ -1,3 +1,4 @@
+import { defineComponent, ref, onMounted, onUnmounted } from "vue";
 import { Cpu, Wifi, Database, X } from "lucide-vue-next";
 
 export default defineComponent({
