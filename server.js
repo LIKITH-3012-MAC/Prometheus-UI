@@ -8,7 +8,12 @@ import AdmZip from 'adm-zip';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
-const pdf = require('pdf-parse');
+let pdfParser = null;
+try {
+  pdfParser = require('pdf-parse');
+} catch (err) {
+  console.warn("pdf-parse loader warning: PDF parsing is unavailable in this environment.", err.message);
+}
 
 dotenv.config();
 
@@ -51,7 +56,10 @@ app.post('/api/parse-file', upload.single('file'), async (req, res) => {
     let base64 = null;
 
     if (ext === 'pdf') {
-      const data = await pdf(buffer);
+      if (!pdfParser) {
+        throw new Error("PDF parsing is not supported in this serverless deployment environment.");
+      }
+      const data = await pdfParser(buffer);
       text = data.text;
     } else if (ext === 'docx') {
       const result = await mammoth.extractRawText({ buffer });
