@@ -398,11 +398,21 @@ export default defineComponent({
       // Open the File Workspace panel for preview and actions
       isFilePanelOpen.value = true;
 
-      // 2. Add local AI message asking for file actions
+      // 2. Build local AI message response content based on status
+      let responseText = "";
+      if (fileData.unreadable) {
+        responseText = "This file format is not directly readable here, but you can still ask me about it. Try uploading a text/PDF/CSV version or paste the content.";
+      } else {
+        if (fileData.isTruncated) {
+          responseText += "This file is large. I’ll analyze the first readable part first. You can ask for specific sections.\n\n";
+        }
+        responseText += "I extracted what I could from this file. What do you want me to do with it?";
+      }
+
       const assistantMsg = {
         role: "assistant",
-        content: "What do you want me to do with this file?",
-        filePrompt: true,
+        content: responseText,
+        filePrompt: !fileData.unreadable, // Only show action buttons if readable
         file: {
           name: fileData.name,
           type: fileData.type
@@ -428,6 +438,7 @@ export default defineComponent({
         key_points: "Key points extraction",
         debug: "Debug code analysis",
         analyze: "Dataset analysis",
+        extract_info: "Extract important information",
         beginner: "Beginner explanation",
       };
 
@@ -457,6 +468,7 @@ export default defineComponent({
         key_points: `Extract and list the key points and critical highlights from the uploaded file "${fileInfo.name}".`,
         debug: `Audit code inside the uploaded file "${fileInfo.name}". Find potential bugs, errors, edge cases, and provide a corrected version.`,
         analyze: `Perform data analysis on the contents of the uploaded file "${fileInfo.name}". Extract trends, anomalies, and insights.`,
+        extract_info: `Extract all important information, metadata, structural schemas, or tables from the uploaded file "${fileInfo.name}".`,
         beginner: `Explain the contents of the uploaded file "${fileInfo.name}" in extremely simple terms, like I am a beginner.`,
       };
 

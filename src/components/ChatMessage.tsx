@@ -182,6 +182,7 @@ export default defineComponent({
       { id: "key_points", label: "Key Points" },
       { id: "debug", label: "Debug Code" },
       { id: "analyze", label: "Analyze Data" },
+      { id: "extract_info", label: "Extract Info" },
       { id: "beginner", label: "Explain Like Beginner" },
     ];
 

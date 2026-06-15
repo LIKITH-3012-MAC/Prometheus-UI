@@ -25,30 +25,34 @@ export default defineComponent({
       const name = props.uploadedFile?.name || "";
       const ext = name.split(".").pop()?.toLowerCase() || "";
 
-      const defaultActions = [
+      const actions = [];
+
+      const codeExtensions = ["js", "jsx", "ts", "tsx", "py", "java", "c", "cpp", "h", "html", "css", "sh", "log", "conf", "config", "env", "ini", "properties", "sql", "xml", "json"];
+      const isCode = codeExtensions.includes(ext) || type.includes("javascript") || type.includes("typescript") || type.includes("json");
+
+      const sheetExtensions = ["csv", "xlsx", "xls"];
+      const isSheet = sheetExtensions.includes(ext) || type.includes("csv") || type.includes("spreadsheet") || type.includes("excel");
+
+      if (isCode) {
+        actions.push({ id: "debug", label: "Debug Code", desc: "Audit bugs and edge cases" });
+      }
+      if (isSheet) {
+        actions.push({ id: "analyze", label: "Analyze Dataset", desc: "Scan trends and statistics" });
+      }
+
+      actions.push(
         { id: "summary", label: "Summarize", desc: "Brief core summary" },
-        { id: "key_points", label: "Key Points", desc: "Extract key bullet points" },
-        { id: "notes", label: "Study Notes", desc: "Generate structured study notes" },
-      ];
+        { id: "indepth", label: "In-depth", desc: "Detailed comprehensive analysis" },
+        { id: "shorter", label: "Shorter", desc: "Concise short summary" },
+        { id: "telish", label: "Telugu-English", desc: "Explain in conversational Telish" },
+        { id: "key_points", label: "Key Points", desc: "List critical take-aways" },
+        { id: "notes", label: "Study Notes", desc: "Generate structured notes" },
+        { id: "interview", label: "Interview Q&A", desc: "Generate technical mock questions" },
+        { id: "extract_info", label: "Extract Info", desc: "Retrieve tables and metadata" },
+        { id: "beginner", label: "Explain Beginner", desc: "Explain simply for beginners" }
+      );
 
-      const codeExtensions = ["js", "jsx", "ts", "tsx", "py", "java", "c", "cpp", "h", "html", "css", "sh"];
-      if (codeExtensions.includes(ext) || type.includes("javascript") || type.includes("typescript") || type.includes("json")) {
-        return [
-          { id: "debug", label: "Debug Code", desc: "Identify bugs & trace errors" },
-          { id: "optimize", label: "Optimize Code", desc: "Refactor for speed/complexity" },
-          { id: "explain_code", label: "Explain Code", desc: "Explain logic step-by-step" },
-          ...defaultActions
-        ];
-      }
-
-      if (type.startsWith("image/")) {
-        return [
-          { id: "analyze_image", label: "Analyze Visuals", desc: "Explain what is in this image" },
-          { id: "ocr", label: "Extract Text", desc: "Perform OCR on image contents" }
-        ];
-      }
-
-      return defaultActions;
+      return actions;
     };
 
     return () => {

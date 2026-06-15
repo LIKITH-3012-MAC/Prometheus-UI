@@ -37,9 +37,114 @@ function getGroqClient() {
 const upload = multer({ storage: multer.memoryStorage() });
 
 function isTextFile(filename) {
-  const textExtensions = ['txt', 'csv', 'json', 'js', 'jsx', 'ts', 'tsx', 'html', 'css', 'py', 'java', 'sql', 'xml', 'yaml', 'yml', 'md', 'c', 'cpp', 'h', 'sh', 'bat'];
+  const textExtensions = ['txt', 'csv', 'json', 'js', 'jsx', 'ts', 'tsx', 'html', 'css', 'py', 'java', 'sql', 'xml', 'yaml', 'yml', 'md', 'c', 'cpp', 'h', 'sh', 'bat', 'log', 'conf', 'config', 'env', 'ini', 'properties'];
   const ext = filename.split('.').pop().toLowerCase();
   return textExtensions.includes(ext);
+}
+
+function isBufferText(buffer) {
+  // Check if buffer contains null bytes in the first 512 bytes (typical binary check)
+  const len = Math.min(buffer.length, 512);
+  for (let i = 0; i < len; i++) {
+    if (buffer[i] === 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function parsePPTX(buffer) {
+  try {
+    const zip = new AdmZip(buffer);
+    const zipEntries = zip.getEntries();
+    let text = "";
+    
+    const slideEntries = zipEntries
+      .filter(entry => entry.entryName.match(/^ppt\/slides\/slide\d+\.xml$/))
+      .sort((a, b) => a.entryName.localeCompare(b.entryName));
+      
+    for (const entry of slideEntries) {
+      const slideNum = entry.entryName.match(/slide(\d+)\.xml/)?.[1] || "";
+      text += `\n--- Slide ${slideNum} ---\n`;
+      const xml = entry.getData().toString('utf8');
+      
+      const matches = xml.match(/<a:t>([^<]*)<\/a:t>/g);
+      if (matches) {
+        matches.forEach(m => {
+          const content = m.replace(/<\/?a:t>/g, '');
+          if (content.trim()) {
+            text += content + "\n";
+          }
+        });
+      }
+    }
+    return text.trim();
+  } catch (err) {
+    console.error("PPTX extract error:", err);
+    throw new Error("Failed to parse PPTX file content.");
+  }
+}
+
+function parseXLSX(buffer) {
+  try {
+    const zip = new AdmZip(buffer);
+    const zipEntries = zip.getEntries();
+    
+    // Extract shared strings
+    const sharedStringsEntry = zipEntries.find(e => e.entryName === "xl/sharedStrings.xml");
+    let sharedStrings = [];
+    if (sharedStringsEntry) {
+      const xml = sharedStringsEntry.getData().toString('utf8');
+      const matches = xml.match(/<t>([^<]*)<\/t>/g);
+      if (matches) {
+        sharedStrings = matches.map(m => m.replace(/<\/?t>/g, ''));
+      }
+    }
+    
+    // Extract sheets
+    let text = "";
+    const sheetEntries = zipEntries
+      .filter(entry => entry.entryName.match(/^xl\/worksheets\/sheet\d+\.xml$/))
+      .sort((a, b) => a.entryName.localeCompare(b.entryName));
+      
+    for (const entry of sheetEntries) {
+      const sheetNum = entry.entryName.match(/sheet(\d+)\.xml/)?.[1] || "";
+      text += `\n--- Sheet ${sheetNum} ---\n`;
+      const xml = entry.getData().toString('utf8');
+      
+      const rowMatches = xml.match(/<row[^>]*>(.*?)<\/row>/g);
+      if (rowMatches) {
+        for (const rowXml of rowMatches) {
+          let rowCells = [];
+          const cellMatches = rowXml.match(/<c[^>]*>(.*?)<\/c>/g);
+          if (cellMatches) {
+            for (const cellXml of cellMatches) {
+              const isString = cellXml.includes('t="s"');
+              const valMatch = cellXml.match(/<v>([^<]*)<\/v>/);
+              if (valMatch) {
+                const val = valMatch[1];
+                if (isString) {
+                  const idx = parseInt(val, 10);
+                  rowCells.push(sharedStrings[idx] || "");
+                } else {
+                  rowCells.push(val);
+                }
+              } else {
+                rowCells.push("");
+              }
+            }
+            if (rowCells.some(c => c !== "")) {
+              text += rowCells.join(" | ") + "\n";
+            }
+          }
+        }
+      }
+    }
+    return text.trim();
+  } catch (err) {
+    console.error("XLSX extract error:", err);
+    throw new Error("Failed to parse XLSX file content.");
+  }
 }
 
 // File extraction API
@@ -54,6 +159,7 @@ app.post('/api/parse-file', upload.single('file'), async (req, res) => {
   try {
     let text = "";
     let base64 = null;
+    let isUnreadable = false;
 
     if (ext === 'pdf') {
       if (!pdfParser) {
@@ -64,11 +170,15 @@ app.post('/api/parse-file', upload.single('file'), async (req, res) => {
     } else if (ext === 'docx') {
       const result = await mammoth.extractRawText({ buffer });
       text = result.value;
+    } else if (ext === 'pptx') {
+      text = parsePPTX(buffer);
+    } else if (ext === 'xlsx') {
+      text = parseXLSX(buffer);
     } else if (ext === 'zip') {
       const zip = new AdmZip(buffer);
       const zipEntries = zip.getEntries();
       for (const entry of zipEntries) {
-        if (!entry.isDirectory && isTextFile(entry.entryName)) {
+        if (!entry.isDirectory && (isTextFile(entry.entryName) || isBufferText(entry.getData()))) {
           text += `\n--- File: ${entry.entryName} ---\n`;
           text += entry.getData().toString('utf8');
         }
@@ -76,21 +186,38 @@ app.post('/api/parse-file', upload.single('file'), async (req, res) => {
     } else if (mimetype.startsWith('image/')) {
       base64 = buffer.toString('base64');
       text = `[Attached Image: ${originalname}]`;
-    } else {
+    } else if (isBufferText(buffer)) {
       // Treat as plain text / source code
       text = buffer.toString('utf8');
+    } else {
+      isUnreadable = true;
     }
+
+    const maxChars = 80000;
+    const isTruncated = text.length > maxChars;
+    const extractedText = isTruncated ? text.substring(0, maxChars) : text;
 
     res.json({
       name: originalname,
       size,
       type: mimetype,
-      text: text.substring(0, 100000), // Clamp to prevent exceeding context window
-      base64
+      text: extractedText,
+      base64,
+      isTruncated,
+      unreadable: isUnreadable
     });
   } catch (err) {
     console.error("Parse File Error:", err);
-    res.status(500).json({ error: "Failed to parse file: " + err.message });
+    res.json({
+      name: originalname,
+      size,
+      type: mimetype,
+      text: "",
+      base64: null,
+      isTruncated: false,
+      unreadable: true,
+      error: err.message
+    });
   }
 });
 
