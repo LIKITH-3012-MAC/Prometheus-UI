@@ -17,7 +17,17 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+let groqInstance = null;
+function getGroqClient() {
+  if (!groqInstance) {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      throw new Error("GROQ_API_KEY is not defined in environment variables. Please add it to Vercel settings and redeploy.");
+    }
+    groqInstance = new Groq({ apiKey });
+  }
+  return groqInstance;
+}
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -201,6 +211,7 @@ app.post('/api/chat', async (req, res) => {
   ];
 
   try {
+    const groq = getGroqClient();
     const response = await groq.chat.completions.create({
       model: modelToUse,
       messages: formattedMessages,
@@ -210,6 +221,7 @@ app.post('/api/chat', async (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
 
     for await (const chunk of response) {
       const content = chunk.choices[0]?.delta?.content || "";
@@ -220,7 +232,7 @@ app.post('/api/chat', async (req, res) => {
     res.end();
   } catch (error) {
     console.error("Express API Error:", error);
-    res.status(500).json({ error: "Server connection issue." });
+    res.status(500).json({ error: error.message || "Server connection issue." });
   }
 });
 
