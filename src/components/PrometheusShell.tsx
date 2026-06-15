@@ -3,7 +3,6 @@ import LeftSidebar from "./LeftSidebar";
 import ChatPanel from "./ChatPanel";
 import PromptComposer from "./PromptComposer";
 import FeaturesDrawer from "./FeaturesDrawer";
-import SystemTelemetryPanel from "./SystemTelemetryPanel";
 import CommandPalette from "./CommandPalette";
 import PromptLibrary from "./PromptLibrary";
 import MissionControl from "./MissionControl";
@@ -13,8 +12,8 @@ import UserOnboarding from "./UserOnboarding";
 import DSAVisualizer from "./DSAVisualizer";
 import FileWorkspacePanel from "./FileWorkspacePanel";
 import { 
-  PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, 
-  Terminal, Trash2, FileDown, Command, Sparkles, Menu, Cpu,
+  PanelLeftClose, PanelLeftOpen, 
+  Terminal, Trash2, FileDown, Command, Sparkles, Menu,
   BookOpen, GraduationCap, Code2, Paperclip 
 } from "lucide-vue-next";
 
@@ -38,7 +37,6 @@ export default defineComponent({
     const theme = ref("dark");
 
     const isSidebarOpen = ref(true);
-    const isTelemetryOpen = ref(true);
 
     const recognitionRef = ref<any>(null);
 
@@ -101,8 +99,6 @@ export default defineComponent({
       const storedSidebar = localStorage.getItem("prometheus_panel_sidebar_open");
       isSidebarOpen.value = storedSidebar !== null ? storedSidebar === "true" : !isMobile;
 
-      const storedTelemetry = localStorage.getItem("prometheus_panel_telemetry_open");
-      isTelemetryOpen.value = storedTelemetry !== null ? storedTelemetry === "true" : !isMobile;
 
       isMissionOpen.value = localStorage.getItem("prometheus_panel_mission_open") === "true";
       isLibraryOpen.value = localStorage.getItem("prometheus_panel_library_open") === "true";
@@ -915,7 +911,6 @@ export default defineComponent({
 
     // Watchers to persist panel states
     watch(isSidebarOpen, (val) => localStorage.setItem("prometheus_panel_sidebar_open", String(val)));
-    watch(isTelemetryOpen, (val) => localStorage.setItem("prometheus_panel_telemetry_open", String(val)));
     watch(isMissionOpen, (val) => localStorage.setItem("prometheus_panel_mission_open", String(val)));
     watch(isLibraryOpen, (val) => localStorage.setItem("prometheus_panel_library_open", String(val)));
     watch(isDsaOpen, (val) => localStorage.setItem("prometheus_panel_dsa_open", String(val)));
@@ -937,13 +932,6 @@ export default defineComponent({
           />
         )}
 
-        {/* Right Telemetry backdrop for mobile/drawer closing */}
-        {isTelemetryOpen.value && (
-          <div
-            onClick={() => (isTelemetryOpen.value = false)}
-            className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm transition-opacity duration-300"
-          />
-        )}
 
         {/* HUD Top Bar Header */}
         <header className={`shrink-0 h-20 flex justify-between items-center px-4 md:px-8 border-b border-white/5 bg-black/40 z-50 select-none transition-all duration-[800ms] ease-out ${
@@ -1005,15 +993,6 @@ export default defineComponent({
               <FileDown className="w-4 h-4" />
             </button>
 
-            {/* Core Status CPU toggle button on all screens */}
-            <button
-              onClick={() => (isTelemetryOpen.value = !isTelemetryOpen.value)}
-              className="px-2 py-2 rounded-xl bg-blue-950/40 border border-blue-500/20 text-[8px] md:text-[9.5px] font-bold text-blue-400 font-orbitron hover:bg-blue-500/15 cursor-pointer flex items-center gap-1 shadow-[0_0_10px_rgba(0,102,255,0.1)] min-h-[44px]"
-              title="Toggle Core Status Telemetry"
-            >
-              <Cpu className="w-3.5 h-3.5" />
-              <span>CORE STATUS</span>
-            </button>
 
             <button
               onClick={() => (isPaletteOpen.value = true)}
@@ -1076,13 +1055,6 @@ export default defineComponent({
               {isSidebarOpen.value ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
             </button>
 
-            <button
-              onClick={() => (isTelemetryOpen.value = !isTelemetryOpen.value)}
-              className="hidden md:inline-flex absolute top-4 right-4 p-2.5 rounded-xl bg-zinc-950/60 border border-white/5 text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10 z-40 transition-all shadow-md cursor-pointer"
-              title="Toggle telemetry panel"
-            >
-              {isTelemetryOpen.value ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
-            </button>
 
             <ChatPanel
               messages={messages.value}
@@ -1109,27 +1081,6 @@ export default defineComponent({
             />
           </section>
 
-          {/* Right sidebar telemetry */}
-          <aside
-            className={`mobile-drawer-right md:relative md:z-30 md:w-80 md:h-full md:bg-[#030612]/30 border-l border-white/5 md:transition-all md:duration-300 md:transform md:rounded-none p-6 overflow-y-auto ${
-              isTelemetryOpen.value 
-                ? "drawer-open md:translate-y-0 md:opacity-100 md:w-80 md:min-w-80" 
-                : "drawer-closed md:translate-y-0 md:w-0 md:min-w-0 md:overflow-hidden md:!p-0 md:!border-l-0 md:opacity-100 md:pointer-events-auto"
-            } ${
-              isMainUiVisible.value 
-                ? "opacity-100" 
-                : "opacity-0 pointer-events-none"
-            }`}
-          >
-            <SystemTelemetryPanel
-              currentMode={currentMode.value}
-              isVoiceInputActive={isVoiceInputActive.value}
-              isTtsActive={isTtsActive.value}
-              messagesCount={messages.value.length}
-              isStreaming={loading.value}
-              onClose={() => (isTelemetryOpen.value = false)}
-            />
-          </aside>
         </div>
 
         {/* Modal views */}
