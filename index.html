@@ -15,12 +15,42 @@
     <meta name="author" content="Likith Naidu Anumakonda" />
     <meta name="developer" content="Likith Naidu Anumakonda" />
     <meta name="institution" content="PBR Visvodaya Institute of Technology and Science (PBRVITS)" />
-    <meta name="department" content="B.Tech Computer Science & Engineering - AI" />
+    <meta name="department" content="B.Tech Computer Science &amp; Engineering - AI" />
     <meta name="research-affiliation" content="IIT-Patna ML Research" />
-    <meta name="creative-profile" content="Classical Pianist & Author of Echoes of an Unsaid Goodbye" />
+    <meta name="creative-profile" content="Classical Pianist &amp; Author of Echoes of an Unsaid Goodbye" />
+
+    <!-- Global error handler: catch runtime JS errors and show them visually -->
+    <script>
+      window.onerror = function(msg, src, line, col, err) {
+        var el = document.getElementById('prometheus-boot-error');
+        if (el) {
+          el.style.display = 'block';
+          el.innerHTML = '<strong>PROMETHEUS BOOT ERROR</strong><br/>' + msg + '<br/>Source: ' + (src||'') + ' line ' + (line||'') + '<br/><br/>Try clearing your browser cache and refreshing.';
+        }
+        console.error('Prometheus boot error:', msg, src, line, col, err);
+      };
+      window.addEventListener('unhandledrejection', function(event) {
+        var el = document.getElementById('prometheus-boot-error');
+        if (el) {
+          el.style.display = 'block';
+          el.innerHTML = '<strong>PROMETHEUS BOOT ERROR</strong><br/>' + (event.reason ? event.reason.message || event.reason : 'Unknown') + '<br/><br/>Try clearing your browser cache and refreshing.';
+        }
+        console.error('Prometheus unhandled rejection:', event.reason);
+      });
+    </script>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!-- Visible loading state shown before Vue mounts (Vue replaces this on mount) -->
+      <div id="prometheus-preloader" style="position:fixed;inset:0;background:#02040A;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;font-family:Georgia,serif;">
+        <div style="width:40px;height:40px;border:3px solid rgba(0,102,255,0.2);border-top-color:#0066FF;border-radius:50%;animation:spin 1s linear infinite;"></div>
+        <div style="margin-top:24px;color:#0066FF;font-size:11px;letter-spacing:0.3em;font-weight:bold;text-transform:uppercase;font-family:'Orbitron',sans-serif;">PROMETHEUS OS</div>
+        <div style="margin-top:8px;color:#555;font-size:10px;letter-spacing:0.15em;">Initializing Core Systems...</div>
+      </div>
+      <!-- Error display (hidden by default, shown by error handler) -->
+      <div id="prometheus-boot-error" style="display:none;position:fixed;inset:0;background:#02040A;color:#ff4444;z-index:999999;padding:40px;font-family:monospace;font-size:13px;line-height:1.8;text-align:center;display:none;flex-direction:column;align-items:center;justify-content:center;"></div>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
