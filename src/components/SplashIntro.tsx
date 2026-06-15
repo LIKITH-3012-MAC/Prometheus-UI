@@ -29,8 +29,20 @@ export default defineComponent({
     onMounted(() => {
       // 1. Setup Three.js scene
       const container = orbContainerRef.value;
-      if (!container) return;
+      if (!container) {
+        // If container missing, skip animation and auto-complete
+        timeouts.push(setTimeout(() => {
+          emit("startTransition");
+        }, 500));
+        timeouts.push(setTimeout(() => {
+          emit("complete");
+        }, 1000));
+        return;
+      }
 
+      let renderer: THREE.WebGLRenderer | null = null;
+      
+      try {
       const width = container.clientWidth;
       const height = container.clientHeight;
 
@@ -38,7 +50,7 @@ export default defineComponent({
       const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
       camera.position.z = 7;
 
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(renderer.domElement);
@@ -253,12 +265,31 @@ export default defineComponent({
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("resize", handleResize);
         cancelAnimationFrame(animationFrameId);
-        renderer.dispose();
-        if (container.contains(renderer.domElement)) {
-          container.removeChild(renderer.domElement);
+        if (renderer) {
+          renderer.dispose();
+          if (container.contains(renderer.domElement)) {
+            container.removeChild(renderer.domElement);
+          }
         }
         timeouts.forEach(t => clearTimeout(t));
       });
+
+      } catch (e) {
+        // WebGL or Three.js failed — gracefully skip the 3D animation
+        console.warn("Prometheus SplashIntro: WebGL initialization failed, skipping 3D intro.", e);
+        // Still fire transition events so the app doesn't stay stuck on black screen
+        timeouts.push(setTimeout(() => {
+          isTransitioning.value = true;
+          emit("startTransition");
+        }, 800));
+        timeouts.push(setTimeout(() => {
+          emit("complete");
+        }, 1300));
+
+        onUnmounted(() => {
+          timeouts.forEach(t => clearTimeout(t));
+        });
+      }
     });
 
     return () => (

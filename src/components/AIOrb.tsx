@@ -10,6 +10,7 @@ export default defineComponent({
       const container = containerRef.value;
       if (!container) return;
 
+      try {
       const width = container.clientWidth;
       const height = container.clientHeight;
 
@@ -130,6 +131,10 @@ export default defineComponent({
           container.removeChild(renderer.domElement);
         }
       });
+
+      } catch (e) {
+        console.warn("AIOrb: WebGL initialization failed, using fallback.", e);
+      }
     });
 
     return () => (
