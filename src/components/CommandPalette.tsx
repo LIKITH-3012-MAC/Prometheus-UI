@@ -20,6 +20,8 @@ export default defineComponent({
       { id: "tts", label: "Toggle Text-to-Speech (TTS)", desc: "Hear responses read aloud", icon: Volume2 },
       { id: "library", label: "Open Prompt Library", desc: "Explore starter prompt templates", icon: ShieldAlert },
       { id: "mission", label: "Open Mission Control", desc: "View advanced academic study planner", icon: GraduationCap },
+      { id: "dsa_visualizer", label: "Open DSA Visualizer", desc: "Interactive algorithm trace sandbox", icon: Code },
+      { id: "file_workspace", label: "Open File Workspace", desc: "Preview and perform document analysis", icon: Cpu },
       { id: "mode_dsa", label: "DSA Mentor Mode", desc: "Focus on coding algorithms & dry runs", icon: Code },
       { id: "mode_aiml", label: "AI/ML Engineer Mode", desc: "Deep dive into model mathematics & formulas", icon: Cpu },
       { id: "mode_sql", label: "SQL Analyst Mode", desc: "Focus on SQL queries and tuning", icon: Terminal },

@@ -10,7 +10,13 @@ import MissionControl from "./MissionControl";
 import FloatingParticles from "./FloatingParticles";
 import SplashIntro from "./SplashIntro";
 import UserOnboarding from "./UserOnboarding";
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Terminal, Trash2, FileDown, Command, Sparkles, Menu, Cpu } from "lucide-vue-next";
+import DSAVisualizer from "./DSAVisualizer";
+import FileWorkspacePanel from "./FileWorkspacePanel";
+import { 
+  PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, 
+  Terminal, Trash2, FileDown, Command, Sparkles, Menu, Cpu,
+  BookOpen, GraduationCap, Code2, Paperclip 
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "PrometheusShell",
@@ -26,6 +32,8 @@ export default defineComponent({
     const isLibraryOpen = ref(false);
     const isMissionOpen = ref(false);
     const isFeaturesOpen = ref(false);
+    const isDsaOpen = ref(false);
+    const isFilePanelOpen = ref(false);
     const uploadedFile = ref<any>(null);
     const theme = ref("dark");
 
@@ -89,8 +97,17 @@ export default defineComponent({
       loadSessions();
       
       const isMobile = window.innerWidth < 768;
-      isSidebarOpen.value = !isMobile;
-      isTelemetryOpen.value = !isMobile;
+      
+      const storedSidebar = localStorage.getItem("prometheus_panel_sidebar_open");
+      isSidebarOpen.value = storedSidebar !== null ? storedSidebar === "true" : !isMobile;
+
+      const storedTelemetry = localStorage.getItem("prometheus_panel_telemetry_open");
+      isTelemetryOpen.value = storedTelemetry !== null ? storedTelemetry === "true" : !isMobile;
+
+      isMissionOpen.value = localStorage.getItem("prometheus_panel_mission_open") === "true";
+      isLibraryOpen.value = localStorage.getItem("prometheus_panel_library_open") === "true";
+      isDsaOpen.value = localStorage.getItem("prometheus_panel_dsa_open") === "true";
+      isFilePanelOpen.value = localStorage.getItem("prometheus_panel_file_open") === "true";
 
       const storedName = localStorage.getItem("prometheus_user_name");
       if (storedName) {
@@ -377,6 +394,9 @@ export default defineComponent({
         text: fileData.text,
         base64: fileData.base64
       };
+      
+      // Open the File Workspace panel for preview and actions
+      isFilePanelOpen.value = true;
 
       // 2. Add local AI message asking for file actions
       const assistantMsg = {
@@ -870,12 +890,24 @@ export default defineComponent({
         isLibraryOpen.value = true;
       } else if (cmdId === "mission") {
         isMissionOpen.value = true;
+      } else if (cmdId === "dsa_visualizer") {
+        isDsaOpen.value = true;
+      } else if (cmdId === "file_workspace") {
+        isFilePanelOpen.value = true;
       } else if (cmdId.startsWith("mode_")) {
         currentMode.value = cmdId.replace("mode_", "");
       } else if (cmdId === "theme") {
         handleToggleTheme();
       }
     };
+
+    // Watchers to persist panel states
+    watch(isSidebarOpen, (val) => localStorage.setItem("prometheus_panel_sidebar_open", String(val)));
+    watch(isTelemetryOpen, (val) => localStorage.setItem("prometheus_panel_telemetry_open", String(val)));
+    watch(isMissionOpen, (val) => localStorage.setItem("prometheus_panel_mission_open", String(val)));
+    watch(isLibraryOpen, (val) => localStorage.setItem("prometheus_panel_library_open", String(val)));
+    watch(isDsaOpen, (val) => localStorage.setItem("prometheus_panel_dsa_open", String(val)));
+    watch(isFilePanelOpen, (val) => localStorage.setItem("prometheus_panel_file_open", String(val)));
 
     return () => (
       <div className="fixed inset-0 text-zinc-100 flex flex-col overflow-hidden select-none">
@@ -1083,6 +1115,7 @@ export default defineComponent({
               isTtsActive={isTtsActive.value}
               messagesCount={messages.value.length}
               isStreaming={loading.value}
+              onClose={() => (isTelemetryOpen.value = false)}
             />
           </aside>
         </div>
@@ -1104,6 +1137,97 @@ export default defineComponent({
           isOpen={isMissionOpen.value}
           onClose={() => (isMissionOpen.value = false)}
         />
+
+        <DSAVisualizer
+          isOpen={isDsaOpen.value}
+          onClose={() => (isDsaOpen.value = false)}
+        />
+
+        <FileWorkspacePanel
+          isOpen={isFilePanelOpen.value}
+          onClose={() => (isFilePanelOpen.value = false)}
+          uploadedFile={uploadedFile.value}
+          onRemoveFile={() => {
+            uploadedFile.value = null;
+          }}
+          onSelectAction={(actionId: string) => {
+            if (uploadedFile.value) {
+              handleSelectFileOption(actionId, {
+                name: uploadedFile.value.name,
+                type: uploadedFile.value.type
+              });
+            }
+          }}
+          onUploadClick={() => {
+            const fileInput = document.getElementById("prometheus-file-input");
+            fileInput?.click();
+          }}
+        />
+
+        {/* Floating Reopen Buttons Dock */}
+        {isMainUiVisible.value && (
+          <div className="fixed right-4 bottom-28 md:bottom-auto md:top-24 z-50 flex flex-col gap-2.5 items-end font-orbitron select-none pointer-events-none">
+            <div className="flex flex-col gap-2.5 items-end pointer-events-auto">
+              {!isTelemetryOpen.value && (
+                <button
+                  onClick={() => (isTelemetryOpen.value = true)}
+                  className="px-3 py-2 rounded-xl bg-blue-950/80 border border-blue-500/30 text-[9px] font-bold text-blue-400 hover:text-white hover:bg-blue-600 transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,102,255,0.2)] cursor-pointer"
+                  title="Restore System Telemetry"
+                >
+                  <Cpu className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">CORE STATUS</span>
+                </button>
+              )}
+
+              {!isMissionOpen.value && (
+                <button
+                  onClick={() => (isMissionOpen.value = true)}
+                  className="px-3 py-2 rounded-xl bg-blue-950/80 border border-blue-500/30 text-[9px] font-bold text-blue-400 hover:text-white hover:bg-blue-600 transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,102,255,0.2)] cursor-pointer"
+                  title="Restore Mission Control"
+                >
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">MISSION CONTROL</span>
+                </button>
+              )}
+
+              {!isLibraryOpen.value && (
+                <button
+                  onClick={() => (isLibraryOpen.value = true)}
+                  className="px-3 py-2 rounded-xl bg-blue-950/80 border border-blue-500/30 text-[9px] font-bold text-blue-400 hover:text-white hover:bg-blue-600 transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,102,255,0.2)] cursor-pointer"
+                  title="Restore Prompt Library"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">PROMPT LIBRARY</span>
+                </button>
+              )}
+
+              {!isDsaOpen.value && (
+                <button
+                  onClick={() => (isDsaOpen.value = true)}
+                  className="px-3 py-2 rounded-xl bg-blue-950/80 border border-blue-500/30 text-[9px] font-bold text-blue-400 hover:text-white hover:bg-blue-600 transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,102,255,0.2)] cursor-pointer"
+                  title="Restore DSA Visualizer"
+                >
+                  <Code2 className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">DSA VISUALIZER</span>
+                </button>
+              )}
+
+              {!isFilePanelOpen.value && (
+                <button
+                  onClick={() => (isFilePanelOpen.value = true)}
+                  className="px-3 py-2 rounded-xl bg-blue-950/80 border border-blue-500/30 text-[9px] font-bold text-blue-400 hover:text-white hover:bg-blue-600 transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,102,255,0.2)] cursor-pointer relative"
+                  title="Restore File Workspace"
+                >
+                  <Paperclip className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">FILE WORKSPACE</span>
+                  {uploadedFile.value && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-400 rounded-full shadow-[0_0_8px_#0066FF]" />
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Cinematic splash opening animation */}
         {showIntro.value && (

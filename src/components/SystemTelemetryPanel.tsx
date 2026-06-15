@@ -1,5 +1,4 @@
-import { defineComponent, ref, onMounted, onUnmounted } from "vue";
-import { Cpu, Wifi, Database } from "lucide-vue-next";
+import { Cpu, Wifi, Database, X } from "lucide-vue-next";
 
 export default defineComponent({
   name: "SystemTelemetryPanel",
@@ -9,6 +8,7 @@ export default defineComponent({
     isTtsActive: { type: Boolean, default: false },
     messagesCount: { type: Number, default: 0 },
     isStreaming: { type: Boolean, default: false },
+    onClose: { type: Function, default: null }
   },
   setup(props) {
     const cpuLoad = ref(22);
@@ -50,13 +50,24 @@ export default defineComponent({
       <div className="flex flex-col gap-6 select-none w-full font-orbitron">
         {/* HUD Header */}
         <div className="flex items-center justify-between px-1">
-          <span className="text-[10px] font-black tracking-[0.25em] text-zinc-500 uppercase">
-            Telemetry
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-[8px] font-black tracking-widest text-blue-400 bg-blue-950/30 px-2 py-0.5 rounded-full border border-blue-500/20">
-            <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
-            ONLINE
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black tracking-[0.25em] text-zinc-500 uppercase">
+              Telemetry
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[8px] font-black tracking-widest text-blue-400 bg-blue-950/30 px-2 py-0.5 rounded-full border border-blue-500/20">
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+              ONLINE
+            </span>
+          </div>
+          {props.onClose && (
+            <button
+              onClick={() => props.onClose()}
+              className="p-1 text-zinc-500 hover:text-white rounded hover:bg-white/5 cursor-pointer flex items-center justify-center"
+              title="Close Telemetry"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         {/* Stats Grid */}

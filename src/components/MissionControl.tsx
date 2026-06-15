@@ -53,9 +53,15 @@ export default defineComponent({
       if (!props.isOpen) return null;
 
       return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+        <>
+          {/* Backdrop on mobile */}
           <div 
-            className="w-full max-w-2xl glass-panel rounded-2xl border border-blue-500/20 overflow-hidden shadow-[0_0_50px_rgba(0,102,255,0.15)] flex flex-col max-h-[85vh]"
+            onClick={() => props.onClose()}
+            className="md:hidden fixed inset-0 bg-black/60 z-50 backdrop-blur-sm"
+          />
+
+          <div 
+            className="fixed md:absolute bottom-0 md:bottom-24 right-0 left-0 md:left-auto md:right-8 md:w-[450px] z-[60] md:z-40 rounded-t-3xl md:rounded-2xl border-x-0 border-b-0 border-t md:border border-blue-500/25 bg-[#050914]/95 backdrop-blur-md shadow-[0_4px_30px_rgba(0,102,255,0.15)] flex flex-col max-h-[80vh] md:max-h-[500px] overflow-hidden transition-all duration-300 font-orbitron"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -131,7 +137,7 @@ export default defineComponent({
               Academic study plan tracked locally • Prometheus Core Systems
             </div>
           </div>
-        </div>
+        </>
       );
     };
   },
